@@ -1,0 +1,96 @@
+[tool.poetry]
+name = "patas-core"
+version = "2.0.0"
+description = "PATAS - Pattern-Adaptive Transmodal Anti-Spam System. Self-learning tool that discovers spam patterns and generates blocking rules automatically."
+authors = ["KikuAI Lab"]
+readme = "README.md"
+license = "MIT"
+packages = [
+    {include = "app"},
+    {include = "telegram_integration"}
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+pydantic = "^2.5.0"
+pydantic-settings = "^2.1.0"
+sqlalchemy = "^2.0.23"
+aiosqlite = "^0.19.0"
+asyncpg = "^0.29.0"
+slowapi = "^0.1.9"
+python-multipart = "^0.0.6"
+transformers = "^4.35.0"
+torch = "^2.1.0"
+numpy = "^1.26.0"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+protobuf = "^6.33.0"
+sentencepiece = "^0.2.1"
+httpx = "^0.25.0"
+cachetools = "^6.2.1"
+redis = {version = "^5.0.0", optional = true}
+opentelemetry-api = "^1.21.0"
+opentelemetry-sdk = "^1.21.0"
+opentelemetry-instrumentation-fastapi = "^0.42b0"
+opentelemetry-instrumentation-httpx = "^0.42b0"
+prometheus-client = "^0.19.0"
+pyyaml = "^6.0.1"
+sqlparse = "^0.4.4"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.21.1"
+pytest-cov = "^4.1.0"
+pytest-benchmark = "^4.0.0"
+locust = "^2.17.0"
+ruff = "^0.1.6"
+mypy = "^1.7.0"
+black = "^23.11.0"
+openai = "^2.7.1"
+tqdm = "^4.67.1"
+requests = "^2.31.0"
+
+[tool.poetry.scripts]
+patas = "app.cli:main"
+patas-api = "app.api.run:main"
+patas-tg = "telegram_integration.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=app",
+    "--cov=telegram_integration",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=85",
+]
+markers = [
+    "e2e: End-to-end tests",
+    "integration: Integration tests",
+    "unit: Unit tests",
+    "slow: Slow running tests",
+]

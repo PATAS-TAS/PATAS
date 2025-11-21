@@ -1,0 +1,169 @@
+{
+  "dashboard": {
+    "title": "PATAS Performance Dashboard",
+    "tags": ["patas", "performance", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "API Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(patas_api_requests_total[5m])",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "API Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(patas_api_latency_seconds_bucket[5m]))",
+            "legendFormat": "P95 Latency"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(patas_api_errors_total[5m])",
+            "legendFormat": "Errors/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Active Rules",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "patas_rules_active",
+            "legendFormat": "Active Rules"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Patterns Discovered (24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(patas_patterns_discovered_total[24h])",
+            "legendFormat": "Patterns"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Ingestion Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(patas_ingestion_throughput[5m])",
+            "legendFormat": "Messages/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Pattern Mining Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "patas_mining_duration_seconds",
+            "legendFormat": "Duration (seconds)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "Average Rule Precision",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(patas_rules_precision)",
+            "legendFormat": "Precision"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 9,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "patas_memory_usage_bytes / 1024 / 1024",
+            "legendFormat": "Memory (MB)"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 10,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "patas_cpu_usage_percent",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+      },
+      {
+        "id": 11,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "patas_database_connections",
+            "legendFormat": "Connections"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+      },
+      {
+        "id": 12,
+        "title": "LLM API Calls",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(patas_llm_calls_total[5m])",
+            "legendFormat": "Calls/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40}
+      },
+      {
+        "id": 13,
+        "title": "Embedding API Calls",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(patas_embedding_calls_total[5m])",
+            "legendFormat": "Calls/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40}
+      }
+    ]
+  }
+}
+

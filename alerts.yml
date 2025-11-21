@@ -1,0 +1,70 @@
+groups:
+  - name: patas_alerts
+    interval: 30s
+    rules:
+      # High false positive rate
+      - alert: HighFalsePositiveRate
+        expr: |
+          rate(patas_rule_evaluation_ham_hits_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High false positive rate detected"
+          description: "Rule evaluation shows high ham hits rate (>10%) over last 5 minutes"
+
+      # Rule precision degradation
+      - alert: RulePrecisionDegradation
+        expr: |
+          (patas_rule_evaluation_precision - patas_rule_evaluation_previous_precision) < -0.1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Rule precision dropped significantly"
+          description: "Rule {{ $labels.rule_id }} precision dropped by more than 10%"
+
+      # Service unavailable
+      - alert: PATASServiceDown
+        expr: |
+          up{job="patas"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PATAS service is down"
+          description: "PATAS API endpoint is not responding"
+
+      # High API latency
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.95, rate(patas_api_request_duration_seconds_bucket[5m])) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API latency detected"
+          description: "95th percentile API latency exceeds 2 seconds"
+
+      # Pattern mining failure
+      - alert: PatternMiningFailure
+        expr: |
+          increase(patas_pattern_mining_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pattern mining errors detected"
+          description: "Pattern mining encountered errors in the last 5 minutes"
+
+      # Low rule coverage
+      - alert: LowRuleCoverage
+        expr: |
+          avg(patas_rule_evaluation_coverage) < 0.01
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low rule coverage"
+          description: "Average rule coverage is below 1% for 30 minutes"
+

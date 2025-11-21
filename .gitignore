@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Database
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Sensitive data
+report.csv
+*.csv
+!docs/*.csv
+!tests/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Poetry
+poetry.lock
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archives (keep structure, but ignore content)
+.archive/
+docs_archive/
+checkpoint.json
+client_validation*.html
+client_validation*.json
+client_validation*.md
+*.json.bak
+evaluation_*.json
+evaluation_output.log
+generated_rules.sql
+ruleset.json
+report.csv
+test_sample.csv
+threshold_calibration.*
+patas-tg-cli-demo.tar.gz
+
+# Internal technical documents (not for public/Telegram team)
+TECHNICAL_AUDIT_REPORT.md
+IMPROVEMENTS_SUMMARY.md
+TEST_RESULTS.md
+SQL_PARSER_IMPROVEMENTS.md
+VERIFICATION_REPORT.md
+docs/SECURITY_AUDIT_CHECKLIST.md
+docs/LOAD_TESTING_GUIDE.md
