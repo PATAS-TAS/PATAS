@@ -994,18 +994,21 @@ class PatternMiningPipeline:
                 # Remove word boundaries and anchors
                 alt = re_module.sub(r'\\[bB]', '', alt)
                 alt = re_module.sub(r'[\^$]', '', alt)
-                # Extract actual words (2+ chars, letters/cyrillic)
-                words = re_module.findall(r'[a-zA-Zа-яА-ЯёЁ]{2,}', alt)
+                # Extract actual words (2+ chars, letters/cyrillic/Chinese/CJK)
+                # CJK Unicode range: \u4e00-\u9fff (Chinese, Japanese, Korean)
+                words = re_module.findall(r'[a-zA-Zа-яА-ЯёЁ\u4e00-\u9fff]{2,}', alt)
                 keywords.extend(words)
         
         # Method 2: Extract from pipe-separated patterns outside groups
         # Pattern: word1|word2|word3 (without parentheses)
-        pipe_separated = re_module.findall(r'(?:^|[^|(])([a-zA-Zа-яА-ЯёЁ]{2,})(?:\||$)', regex_str)
+        # Include CJK Unicode range: \u4e00-\u9fff
+        pipe_separated = re_module.findall(r'(?:^|[^|(])([a-zA-Zа-яА-ЯёЁ\u4e00-\u9fff]{2,})(?:\||$)', regex_str)
         keywords.extend(pipe_separated)
         
         # Method 3: Extract standalone words (2+ chars, not in special constructs)
-        # Look for sequences of letters/cyrillic not in regex constructs
-        word_pattern = r'(?<![|(\\])\b([a-zA-Zа-яА-ЯёЁ]{2,})\b(?![|)\\]|\\b)'
+        # Look for sequences of letters/cyrillic/Chinese not in regex constructs
+        # Include CJK Unicode range: \u4e00-\u9fff
+        word_pattern = r'(?<![|(\\])([a-zA-Zа-яА-ЯёЁ\u4e00-\u9fff]{2,})(?![|)\\]|\\b)'
         word_matches = re_module.findall(word_pattern, regex_str)
         keywords.extend(word_matches)
         
