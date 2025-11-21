@@ -96,10 +96,10 @@ class CommercialPatterns:
                 "Multiple URLs (commercial spam indicator)",
             ),
             
-            # Telegram Links (Strong Commercial Indicator)
-            "telegram_link": (
+            # Messenger Links (Strong Commercial Indicator)
+            "messenger_link": (
                 re.compile(
-                    r"(?i)(?:https?://)?(?:t\.me|telegram\.me)/[^\s]+",
+                    r"(?i)(?:https?://)?(?:t\.me|messenger\.me)/[^\s]+",
                     re.IGNORECASE,
                 ),
                 "Telegram link (commercial spam indicator)",
