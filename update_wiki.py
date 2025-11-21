@@ -1,124 +1,110 @@
 #!/usr/bin/env python3
 """
-Update GitHub Wiki pages via API.
+Update GitHub Wiki pages via git.
 
-Requires GITHUB_TOKEN environment variable with repo scope.
+Clones the Wiki repository, updates pages, and pushes changes.
 """
 import os
 import sys
-import json
-import requests
+import subprocess
+import shutil
 from pathlib import Path
 
 REPO_OWNER = "kiku-jw"
 REPO_NAME = "PATAS"
-WIKI_BASE_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/wiki"
+WIKI_REPO_URL = f"https://github.com/{REPO_OWNER}/{REPO_NAME}.wiki.git"
 
 # Map local files to wiki page names
 WIKI_PAGES = {
-    "wiki_Performance.md": "Performance",
-    "wiki_On-Premise-Deployment.md": "On-Premise-Deployment",
-    "wiki_Incremental-Mining.md": "Incremental-Mining",
-    "wiki_Roadmap.md": "Roadmap",
-    "wiki_Horizontal-Scaling_EN.md": "Horizontal-Scaling",
-    "wiki_Home_Updated.md": "Home",
-    "wiki_FAQ_EN.md": "FAQ",
+    "wiki_Performance.md": "Performance.md",
+    "wiki_On-Premise-Deployment.md": "On-Premise-Deployment.md",
+    "wiki_Incremental-Mining.md": "Incremental-Mining.md",
+    "wiki_Roadmap.md": "Roadmap.md",
+    "wiki_Horizontal-Scaling_EN.md": "Horizontal-Scaling.md",
+    "wiki_Home_Updated.md": "Home.md",
+    "wiki_FAQ_EN.md": "FAQ.md",
 }
-
-def get_auth_headers():
-    """Get authentication headers."""
-    token = os.getenv("GITHUB_TOKEN")
-    if not token:
-        print("Error: GITHUB_TOKEN environment variable not set")
-        print("Set it with: export GITHUB_TOKEN=your_token")
-        sys.exit(1)
-    return {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3+json",
-    }
-
-def get_page_sha(page_name: str, headers: dict) -> str:
-    """Get current page SHA."""
-    url = f"{WIKI_BASE_URL}/pages/{page_name}"
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response.json()["sha"]
-    elif response.status_code == 404:
-        # Page doesn't exist yet, will be created
-        return None
-    else:
-        print(f"Error getting page {page_name}: {response.status_code}")
-        print(response.text)
-        return None
-
-def update_wiki_page(page_name: str, content: str, headers: dict, sha: str = None):
-    """Update or create wiki page."""
-    url = f"{WIKI_BASE_URL}/pages/{page_name}"
-    data = {
-        "title": page_name,
-        "body": content,
-    }
-    if sha:
-        data["sha"] = sha
-    
-    response = requests.put(url, headers=headers, json=data)
-    if response.status_code in [200, 201]:
-        print(f"✅ Updated: {page_name}")
-        return True
-    else:
-        print(f"❌ Failed to update {page_name}: {response.status_code}")
-        print(response.text)
-        return False
 
 def main():
     """Main function."""
-    headers = get_auth_headers()
-    
-    # Check if files exist
     base_dir = Path(__file__).parent
-    missing_files = []
-    for local_file, page_name in WIKI_PAGES.items():
-        file_path = base_dir / local_file
-        if not file_path.exists():
-            missing_files.append(local_file)
+    wiki_dir = base_dir / "wiki_temp"
     
-    if missing_files:
-        print(f"Warning: Missing files: {', '.join(missing_files)}")
-        print("Skipping missing files...")
+    # Clean up any existing temp directory
+    if wiki_dir.exists():
+        shutil.rmtree(wiki_dir)
     
-    # Update pages
-    updated = 0
-    failed = 0
-    
-    for local_file, page_name in WIKI_PAGES.items():
-        file_path = base_dir / local_file
-        if not file_path.exists():
-            continue
+    try:
+        # Clone Wiki repository
+        print("📥 Cloning Wiki repository...")
+        subprocess.run(
+            ["git", "clone", WIKI_REPO_URL, str(wiki_dir)],
+            check=True,
+            capture_output=True
+        )
         
-        print(f"\n📄 Processing: {local_file} → {page_name}")
+        # Check if files exist and copy them
+        updated = 0
+        missing = 0
         
-        # Read content
-        try:
-            content = file_path.read_text(encoding="utf-8")
-        except Exception as e:
-            print(f"❌ Error reading {local_file}: {e}")
-            failed += 1
-            continue
-        
-        # Get current SHA
-        sha = get_page_sha(page_name, headers)
-        
-        # Update page
-        if update_wiki_page(page_name, content, headers, sha):
+        for local_file, wiki_file in WIKI_PAGES.items():
+            local_path = base_dir / local_file
+            wiki_path = wiki_dir / wiki_file
+            
+            if not local_path.exists():
+                print(f"⚠️  Missing: {local_file}")
+                missing += 1
+                continue
+            
+            # Copy file
+            shutil.copy2(local_path, wiki_path)
+            print(f"✅ Copied: {local_file} → {wiki_file}")
             updated += 1
-        else:
-            failed += 1
-    
-    print(f"\n{'='*50}")
-    print(f"✅ Updated: {updated}")
-    print(f"❌ Failed: {failed}")
-    print(f"{'='*50}")
+        
+        if updated == 0:
+            print("❌ No files to update")
+            return
+        
+        # Commit and push
+        print("\n📝 Committing changes...")
+        subprocess.run(
+            ["git", "add", "-A"],
+            cwd=wiki_dir,
+            check=True,
+            capture_output=True
+        )
+        
+        subprocess.run(
+            ["git", "commit", "-m", "Update wiki pages: remove platform-specific references"],
+            cwd=wiki_dir,
+            check=True,
+            capture_output=True
+        )
+        
+        print("🚀 Pushing to GitHub...")
+        subprocess.run(
+            ["git", "push", "origin", "master"],
+            cwd=wiki_dir,
+            check=True,
+            capture_output=True
+        )
+        
+        print(f"\n{'='*50}")
+        print(f"✅ Updated: {updated} pages")
+        if missing > 0:
+            print(f"⚠️  Missing: {missing} files")
+        print(f"{'='*50}")
+        
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error: {e}")
+        if e.stderr:
+            print(e.stderr.decode())
+        sys.exit(1)
+    finally:
+        # Clean up
+        if wiki_dir.exists():
+            shutil.rmtree(wiki_dir)
+            print("\n🧹 Cleaned up temporary files")
 
 if __name__ == "__main__":
     main()
-
