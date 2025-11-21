@@ -21,6 +21,7 @@ The system discovers patterns by meaning (not just keywords), groups similar mes
 ## Try It Out
 
 **Live Demo**: [https://patas.app/demo](https://patas.app/demo)
+**Mini PRD**: [https://patas.app/prd](https://patas.app/prd)
 
 ---
 
