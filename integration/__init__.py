@@ -13,8 +13,8 @@ This package provides:
 Designed for on-premise deployment.
 
 Example usage:
-    from messenger_integration.adapters import MessengerMessageAdapter
-    from messenger_integration.backends import MessengerRuleBackend
+    from integration.adapters import MessengerMessageAdapter
+    from integration.backends import MessengerRuleBackend
     
     adapter = MessengerMessageAdapter()
     message = adapter.from_platform_record(platform_log_record)
@@ -26,11 +26,11 @@ Example usage:
 __version__ = "0.1.0"
 __author__ = "KikuAI Lab"
 
-from messenger_integration.adapters import (
+from integration.adapters import (
     MessengerMessageAdapter,
     MessengerBatchLoader,
 )
-from messenger_integration.backends import MessengerRuleBackend
+from integration.backends import MessengerRuleBackend
 
 __all__ = [
     "MessengerMessageAdapter",

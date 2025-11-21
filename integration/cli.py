@@ -28,9 +28,9 @@ from typing import Optional, Dict, Any, List
 import yaml
 import json
 
-from messenger_integration.adapters import MessengerMessageAdapter, MessengerBatchLoader
-from messenger_integration.backends import MessengerRuleBackend
-from messenger_integration.patas_core_client import run_batch_analysis
+from integration.adapters import MessengerMessageAdapter, MessengerBatchLoader
+from integration.backends import MessengerRuleBackend
+from integration.patas_core_client import run_batch_analysis
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")

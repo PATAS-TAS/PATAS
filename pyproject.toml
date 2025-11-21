@@ -7,7 +7,7 @@ readme = "README.md"
 license = "MIT"
 packages = [
     {include = "app"},
-    {include = "messenger_integration"}
+    {include = "integration"}
 ]
 
 [tool.poetry.dependencies]
@@ -55,7 +55,7 @@ requests = "^2.31.0"
 [tool.poetry.scripts]
 patas = "app.cli:main"
 patas-api = "app.api.run:main"
-patas-messenger = "messenger_integration.cli:main"
+patas-integration = "integration.cli:main"
 
 [build-system]
 requires = ["poetry-core"]
@@ -82,7 +82,7 @@ addopts = [
     "--strict-markers",
     "--tb=short",
     "--cov=app",
-    "--cov=messenger_integration",
+    "--cov=integration",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",

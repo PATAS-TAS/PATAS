@@ -40,8 +40,8 @@ patas-messenger poc \
 ### Programmatic
 
 ```python
-from messenger_integration.adapters import MessengerMessageAdapter
-from messenger_integration.backends import MessengerRuleBackend
+from integration.adapters import MessengerMessageAdapter
+from integration.backends import MessengerRuleBackend
 
 # Convert platform log to PATAS message
 adapter = MessengerMessageAdapter()
