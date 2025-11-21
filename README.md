@@ -18,6 +18,12 @@ The system discovers patterns by meaning (not just keywords), groups similar mes
 
 ---
 
+## Try It Out
+
+**Live Demo**: [https://patas.app/demo](https://patas.app/demo)
+
+---
+
 ## Documentation
 
 Complete documentation is available in the [Wiki](https://github.com/kiku-jw/PATAS/wiki).
