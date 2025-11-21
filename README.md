@@ -31,6 +31,7 @@ Complete documentation is available in the [Wiki](https://github.com/kiku-jw/PAT
 **Essential for developers:**
 - **[Quick Start Guide](https://github.com/kiku-jw/PATAS/wiki/Quick-Start)** - Installation, configuration, and basic usage
 - **[FAQ](https://github.com/kiku-jw/PATAS/wiki/FAQ)** - Frequently asked questions
+- **[Product PRD](https://github.com/kiku-jw/PATAS/wiki/Product-PRD)** - Complete Product Requirements Document
 - **[Architecture](https://github.com/kiku-jw/PATAS/wiki/Architecture)** - System design and components
 - **[API Reference](https://github.com/kiku-jw/PATAS/wiki/API-Reference)** - Complete API endpoint documentation
 - **[Production Deployment Guide](https://github.com/kiku-jw/PATAS/wiki/Production-Deployment-Guide)** - Production deployment and maintenance
