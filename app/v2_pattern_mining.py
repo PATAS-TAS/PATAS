@@ -857,7 +857,7 @@ class PatternMiningPipeline:
         pattern_str = regex_pattern.pattern
         
         # For complex patterns that need regex, use REGEXP
-        complex_patterns = ["phone", "telegram_link", "multiple_urls", "excessive_emoji", 
+        complex_patterns = ["phone", "messenger_link", "multiple_urls", "excessive_emoji", 
                            "excessive_caps", "repeated_symbols"]
         
         if pattern_name in complex_patterns:

@@ -17,7 +17,7 @@ def normalize_for_signature(text: str) -> str:
     # Remove URLs (keep placeholder)
     text = re.sub(r'https?://[^\s]+', '[URL]', text)
     text = re.sub(r'www\.[^\s]+', '[URL]', text)
-    text = re.sub(r't\.me/[^\s]+', '[TELEGRAM]', text)
+    text = re.sub(r't\.me/[^\s]+', '[MESSENGER]', text)
     
     # Normalize phone numbers
     text = re.sub(r'\+\d{1,3}[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}', '[PHONE]', text)

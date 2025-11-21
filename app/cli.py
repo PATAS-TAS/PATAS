@@ -535,7 +535,7 @@ def main():
         exit_code = asyncio.run(run_safety_evaluation())
         sys.exit(exit_code)
     
-    elif command in ("demo-tg", "demo-telegram"):
+    elif command in ("demo-messenger", "demo"):
         import argparse
         from pathlib import Path
         
@@ -556,15 +556,15 @@ def main():
         parser.add_argument(
             "--out",
             type=Path,
-            default=Path("./patas_demo_telegram"),
-            help="Output directory (default: ./patas_demo_telegram)",
+            default=Path("./patas_demo"),
+            help="Output directory (default: ./patas_demo)",
         )
         
         # Parse args from sys.argv[2:]
         args = parser.parse_args(sys.argv[2:] if len(sys.argv) > 2 else [])
         
-        from scripts.demo_telegram import run_demo_telegram
-        exit_code = asyncio.run(run_demo_telegram(
+        from scripts.demo_messenger import run_demo_messenger
+        exit_code = asyncio.run(run_demo_messenger(
             input_path=args.input,
             profile=args.profile,
             output_dir=args.out,

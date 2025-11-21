@@ -1,20 +1,18 @@
 """
-Telegram message adapters for PATAS Core.
+Messenger platform adapters for PATAS Core.
 
-**Purpose**: Convert Telegram's internal message/log format to PATAS Core's generic Message model.
+**Purpose**: Convert platform-specific message/log format to PATAS Core's generic Message model.
 
 **Key Components**:
-1. TelegramMessageAdapter - Converts single Telegram log entry → PATAS Message
-2. TelegramBatchLoader - Loads batches of messages from various sources (file, DB, API)
+1. MessengerMessageAdapter - Converts single platform log entry → PATAS Message
+2. MessengerBatchLoader - Loads batches of messages from various sources (file, DB, API)
 
 **For Developers**:
-- This adapter handles field mapping (Telegram fields → PATAS fields)
+- This adapter handles field mapping (platform fields → PATAS fields)
 - Critical fields for semantic mining: text, language, message_type
 - Missing optional fields are handled gracefully (defaults to "unknown" or None)
 - In production, you'll need to implement load_from_database() and load_from_api()
-  based on Telegram's actual database schema and API contract.
-
-**See**: TELEGRAM_DATA_CONTRACT.md for expected field mappings.
+  based on your platform's database schema and API contract.
 """
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
@@ -28,25 +26,25 @@ except ImportError:
     Message = None  # type: ignore
 
 
-class TelegramMessageAdapter:
+class MessengerMessageAdapter:
     """
-    Adapter for converting Telegram message/log entries to PATAS Message model.
+    Adapter for converting platform message/log entries to PATAS Message model.
     
-    This adapter handles the mapping between Telegram's internal message format
+    This adapter handles the mapping between platform-specific message format
     and PATAS Core's generic Message model.
     
     Usage:
-        adapter = TelegramMessageAdapter()
-        patas_message = adapter.from_telegram_record(telegram_log_entry)
+        adapter = MessengerMessageAdapter()
+        patas_message = adapter.from_platform_record(platform_log_entry)
     """
     
     def __init__(self):
         """Initialize the adapter."""
         pass
     
-    def from_telegram_record(self, raw: Dict[str, Any]) -> Message:
+    def from_platform_record(self, raw: Dict[str, Any]) -> Message:
         """
-        Convert a Telegram log entry to a PATAS Message.
+        Convert a platform log entry to a PATAS Message.
         
         **Field Mapping for Semantic Mining** (first-class feature):
         - `text` → `Message.text`: **Critical** - Used for embedding generation
@@ -63,7 +61,7 @@ class TelegramMessageAdapter:
         - `moderator_label` → `Message.is_spam`: Alternative spam label source
         
         Args:
-            raw: Telegram log entry dictionary with fields like:
+            raw: Platform log entry dictionary with fields like:
                 - message_id (or id) - Required
                 - text (or content) - Required, critical for semantic mining
                 - timestamp (or created_at, date) - Required
@@ -91,7 +89,7 @@ class TelegramMessageAdapter:
         # Note: message_id is critical - used as external_id in PATAS Core Message model
         external_id = raw.get("message_id") or raw.get("id")
         if not external_id:
-            raise ValueError("Telegram record missing message_id or id")
+            raise ValueError("Platform record missing message_id or id")
         
         # Text is required for semantic pattern mining (first-class feature)
         text = raw.get("text") or raw.get("content") or ""
@@ -150,15 +148,15 @@ class TelegramMessageAdapter:
             unbanned=unbanned,
         )
     
-    def from_telegram_batch(self, records: List[Dict[str, Any]]) -> List[Message]:
+    def from_platform_batch(self, records: List[Dict[str, Any]]) -> List[Message]:
         """
-        Convert a batch of Telegram records to PATAS Messages.
+        Convert a batch of platform records to PATAS Messages.
         
         Handles invalid records gracefully by skipping them and continuing processing.
         This allows batch processing to continue even if some records are malformed.
         
         Args:
-            records: List of Telegram log entry dictionaries
+            records: List of platform log entry dictionaries
         
         Returns:
             List[Message]: List of PATAS Message objects (only valid records)
@@ -166,7 +164,7 @@ class TelegramMessageAdapter:
         messages = []
         for record in records:
             try:
-                message = self.from_telegram_record(record)
+                message = self.from_platform_record(record)
                 messages.append(message)
             except (ValueError, KeyError) as e:
                 # Skip invalid records and continue processing
@@ -180,13 +178,13 @@ class TelegramMessageAdapter:
     
     def _parse_timestamp(self, timestamp: Any) -> datetime:
         """
-        Parse timestamp from various Telegram formats.
+        Parse timestamp from various platform formats.
         
         Supports:
         - Unix timestamp (int or float)
         - ISO 8601 string
         - datetime object
-        - Telegram date format (if different)
+        - Platform-specific date format (if different)
         """
         if timestamp is None:
             return datetime.now(timezone.utc)
@@ -213,13 +211,13 @@ class TelegramMessageAdapter:
     
     def _extract_spam_label(self, raw: Dict[str, Any]) -> bool:
         """
-        Extract spam label from Telegram record.
+        Extract spam label from platform record.
         
         Checks various fields that might indicate spam:
         - is_spam (boolean)
         - spam_flag (boolean)
-        - label_spam (boolean) - Telegram-specific field
-        - label_not_spam (boolean) - Telegram-specific field
+        - label_spam (boolean)
+        - label_not_spam (boolean)
         - moderator_label (string: "spam", "ham", etc.)
         - label (string)
         """
@@ -230,7 +228,7 @@ class TelegramMessageAdapter:
         if "spam_flag" in raw:
             return bool(raw["spam_flag"])
         
-        # Telegram-specific label fields
+        # Platform-specific label fields
         if "label_spam" in raw:
             return bool(raw["label_spam"])
         
@@ -250,9 +248,9 @@ class TelegramMessageAdapter:
         return False
 
 
-class TelegramBatchLoader:
+class MessengerBatchLoader:
     """
-    Helper for loading Telegram messages in batches from various sources.
+    Helper for loading platform messages in batches from various sources.
     
     Supports:
     - Database queries (PostgreSQL, MySQL, etc.)
@@ -260,12 +258,12 @@ class TelegramBatchLoader:
     - API endpoints
     """
     
-    def __init__(self, adapter: TelegramMessageAdapter):
+    def __init__(self, adapter: MessengerMessageAdapter):
         """
         Initialize batch loader.
         
         Args:
-            adapter: TelegramMessageAdapter instance
+            adapter: MessengerMessageAdapter instance
         """
         self.adapter = adapter
     
@@ -278,10 +276,8 @@ class TelegramBatchLoader:
         """
         Load messages from a database.
         
-        **⚠️ TODO: Implement this method with Telegram infra team**
-        
         **Expected Database Schema**:
-        The query should return rows with at least these fields (see TELEGRAM_DATA_CONTRACT.md):
+        The query should return rows with at least these fields:
         - `message_id` (or `id`) - Required
         - `text` (or `content`) - Required, critical for semantic mining
         - `timestamp` (or `created_at`, `date`) - Required
@@ -290,22 +286,16 @@ class TelegramBatchLoader:
         - Optional: `user_id`, `chat_id`, `chat_type`, etc.
         
         **Implementation Steps**:
-        1. Connect to Telegram's database (PostgreSQL, MySQL, etc.)
+        1. Connect to database (PostgreSQL, MySQL, etc.)
            - Use connection_string for credentials
            - Consider connection pooling for production
         2. Execute the provided query with parameters
            - Use parameterized queries to prevent SQL injection
            - Handle pagination if query returns large result sets
-        3. Fetch rows and convert to Telegram log format (dict)
-           - Each row becomes a dict with field names matching TELEGRAM_DATA_CONTRACT.md
-        4. Use `TelegramMessageAdapter.from_telegram_batch()` to convert to PATAS Messages
+        3. Fetch rows and convert to platform log format (dict)
+           - Each row becomes a dict with field names
+        4. Use `MessengerMessageAdapter.from_platform_batch()` to convert to PATAS Messages
            - This handles field mapping and validation
-        
-        **To be implemented** together with Telegram infra team based on:
-        - Actual database schema (table names, column names)
-        - Connection method (direct DB, read replica, connection pool)
-        - Security requirements (credentials, network access, TLS)
-        - Performance requirements (batch size, pagination)
         
         **Example Implementation Skeleton**:
         ```python
@@ -315,28 +305,27 @@ class TelegramBatchLoader:
         rows = await conn.fetch(query, *params.values())
         
         records = [dict(row) for row in rows]
-        return self.adapter.from_telegram_batch(records)
+        return self.adapter.from_platform_batch(records)
         ```
         
         Args:
             connection_string: Database connection string (e.g., postgresql://user:pass@host/db)
-            query: SQL query to fetch messages (must return fields matching TELEGRAM_DATA_CONTRACT.md)
+            query: SQL query to fetch messages
             params: Query parameters (for parameterized queries)
         
         Returns:
             List[Message]: Loaded messages
         
         Raises:
-            NotImplementedError: This method must be implemented based on Telegram's database schema
+            NotImplementedError: This method must be implemented based on your platform's database schema
         """
         # TODO: Implement database loading
-        # This will depend on Telegram's actual database schema
-        # Expected fields: message_id, text, timestamp, is_spam, language (see TELEGRAM_DATA_CONTRACT.md)
+        # This will depend on your platform's actual database schema
+        # Expected fields: message_id, text, timestamp, is_spam, language
         raise NotImplementedError(
             "Database loading not yet implemented. "
-            "This requires Telegram's database schema specification. "
-            "See TELEGRAM_DATA_CONTRACT.md for expected field mappings. "
-            "Coordinate with Telegram infra team to implement this method."
+            "This requires your platform's database schema specification. "
+            "Implement this method based on your database structure."
         )
     
     async def load_from_file(
@@ -393,7 +382,7 @@ class TelegramBatchLoader:
         else:
             raise ValueError(f"Unsupported format: {format}")
         
-        return self.adapter.from_telegram_batch(records)
+        return self.adapter.from_platform_batch(records)
     
     async def load_from_api(
         self,
@@ -403,7 +392,7 @@ class TelegramBatchLoader:
         limit: Optional[int] = None,
     ) -> List[Message]:
         """
-        Load messages from a Telegram API endpoint.
+        Load messages from a platform API endpoint.
         
         **Expected API Contract**:
         The API should return JSON responses with message objects containing:
@@ -414,23 +403,21 @@ class TelegramBatchLoader:
         - `language` (or `lang`, `detected_lang`) - Recommended for semantic mining
         - Optional: `user_id`, `chat_id`, `chat_type`, etc.
         
-        See `TELEGRAM_DATA_CONTRACT.md` for complete field mapping.
-        
         **Implementation Note**:
         This method is a placeholder. The actual implementation should:
-        1. Make HTTP request to Telegram's internal API
+        1. Make HTTP request to platform API
         2. Handle authentication (API key, OAuth, etc.)
         3. Handle pagination if needed
         4. Parse JSON response
-        5. Use `TelegramMessageAdapter.from_telegram_batch()` to convert to PATAS Messages
+        5. Use `MessengerMessageAdapter.from_platform_batch()` to convert to PATAS Messages
         
-        **To be implemented** together with Telegram infra team based on:
+        **To be implemented** based on:
         - Actual API contract (endpoints, request/response format)
         - Authentication method
         - Rate limiting and pagination
         
         Args:
-            api_url: API endpoint URL (e.g., "https://internal-api.telegram.org/logs")
+            api_url: API endpoint URL
             api_key: Optional API key for authentication
             since: Load messages since this timestamp (for incremental loading)
             limit: Maximum number of messages to load (for pagination)
@@ -439,14 +426,13 @@ class TelegramBatchLoader:
             List[Message]: Loaded messages
         
         Raises:
-            NotImplementedError: This method must be implemented based on Telegram's API contract
+            NotImplementedError: This method must be implemented based on your platform's API contract
         """
         # TODO: Implement API loading
-        # This will depend on Telegram's actual API contract
-        # Expected response format: JSON array or JSONL with fields matching TELEGRAM_DATA_CONTRACT.md
+        # This will depend on your platform's actual API contract
+        # Expected response format: JSON array or JSONL
         raise NotImplementedError(
             "API loading not yet implemented. "
-            "This requires Telegram's API contract specification. "
-            "See TELEGRAM_DATA_CONTRACT.md for expected field mappings."
+            "This requires your platform's API contract specification."
         )
 

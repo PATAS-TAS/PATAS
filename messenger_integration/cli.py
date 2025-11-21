@@ -1,19 +1,19 @@
 """
-PoC CLI for Telegram integration.
+PoC CLI for messenger platform integration.
 
 This module provides a single command-line interface for running a Proof-of-Concept
-(PoC) of PATAS Core on Telegram logs. It orchestrates the full flow:
-1. Load Telegram logs (from file, database, or API)
-2. Convert to PATAS Message format via TelegramMessageAdapter
+(PoC) of PATAS Core on platform logs. It orchestrates the full flow:
+1. Load platform logs (from file, database, or API)
+2. Convert to PATAS Message format via MessengerMessageAdapter
 3. Run PATAS Core analysis (semantic + deterministic pattern discovery)
 4. Evaluate rules in shadow mode
-5. Convert rules to Telegram format via TelegramRuleBackend
+5. Convert rules to platform format via MessengerRuleBackend
 6. Generate human-readable report
 
-**Main Command**: `patas-tg poc`
+**Main Command**: `patas-messenger poc`
 
 **Usage**:
-    patas-tg poc --config=config.yaml --input=./sample_data/tg_logs.jsonl --out=./artifacts/poc_report.md
+    patas-messenger poc --config=config.yaml --input=./sample_data/logs.jsonl --out=./artifacts/poc_report.md
 
 **For Developers**:
 - This CLI is designed for PoC/demo purposes
@@ -28,9 +28,9 @@ from typing import Optional, Dict, Any, List
 import yaml
 import json
 
-from telegram_integration.adapters import TelegramMessageAdapter, TelegramBatchLoader
-from telegram_integration.backends import TelegramRuleBackend
-from telegram_integration.patas_core_client import run_batch_analysis
+from messenger_integration.adapters import MessengerMessageAdapter, MessengerBatchLoader
+from messenger_integration.backends import MessengerRuleBackend
+from messenger_integration.patas_core_client import run_batch_analysis
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -38,19 +38,19 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(level
 
 async def cmd_poc(
     config_path: str = "config/config.yaml",
-    input_path: str = "examples/sample_telegram_logs.jsonl",
+    input_path: str = "examples/sample_logs.jsonl",
     output_path: str = "artifacts/poc_report.md",
 ) -> None:
     """
-    Run PoC flow: ingest Telegram logs, run semantic + deterministic pattern discovery,
+    Run PoC flow: ingest platform logs, run semantic + deterministic pattern discovery,
     evaluate rules, generate report.
     
     Args:
         config_path: Path to config.yaml
-        input_path: Path to Telegram logs (JSONL/CSV)
+        input_path: Path to platform logs (JSONL/CSV)
         output_path: Path to output report (Markdown)
     """
-    logger.info("Starting PATAS-for-Telegram PoC")
+    logger.info("Starting PATAS messenger integration PoC")
     
     # ============================================================================
     # STEP 1: Load Configuration
@@ -63,17 +63,17 @@ async def cmd_poc(
     logger.info(f"Loaded config from {config_path}")
     
     # ============================================================================
-    # STEP 2: Load and Convert Telegram Logs
+    # STEP 2: Load and Convert Platform Logs
     # ============================================================================
-    # TelegramMessageAdapter converts raw Telegram log entries to PATAS Message model.
-    # TelegramBatchLoader handles loading from different sources (file, DB, API).
+    # MessengerMessageAdapter converts raw platform log entries to PATAS Message model.
+    # MessengerBatchLoader handles loading from different sources (file, DB, API).
     # 
     # For PoC, we use file loading. In production, you'll implement:
-    # - TelegramBatchLoader.load_from_database() - Connect to Telegram DB
-    # - TelegramBatchLoader.load_from_api() - Connect to Telegram API
-    logger.info(f"Loading Telegram logs from {input_path}")
-    adapter = TelegramMessageAdapter()
-    loader = TelegramBatchLoader(adapter)
+    # - MessengerBatchLoader.load_from_database() - Connect to platform DB
+    # - MessengerBatchLoader.load_from_api() - Connect to platform API
+    logger.info(f"Loading platform logs from {input_path}")
+    adapter = MessengerMessageAdapter()
+    loader = MessengerBatchLoader(adapter)
     
     # Auto-detect file format (JSONL, CSV, or JSON)
     input_file = Path(input_path)
@@ -88,7 +88,7 @@ async def cmd_poc(
         file_format = "json"
     
     # Load messages and convert to PATAS Message format
-    # Each message is converted via TelegramMessageAdapter.from_telegram_record()
+    # Each message is converted via MessengerMessageAdapter.from_platform_record()
     messages = await loader.load_from_file(input_path, format=file_format)
     logger.info(f"Loaded {len(messages)} messages")
     
@@ -121,7 +121,7 @@ async def cmd_poc(
     }
     
     # Enable/disable mining types based on config
-    # Semantic mining is FIRST-CLASS for Telegram (catches variations, synonyms)
+    # Semantic mining is FIRST-CLASS (catches variations, synonyms)
     enable_semantic = config.get("pattern_mining", {}).get("use_semantic", True)
     enable_deterministic = config.get("pattern_mining", {}).get("use_deterministic", True)
     
@@ -139,32 +139,32 @@ async def cmd_poc(
     )
     
     # ============================================================================
-    # STEP 4: Convert Rules to Telegram Format
+    # STEP 4: Convert Rules to Platform Format
     # ============================================================================
-    # TelegramRuleBackend converts PATAS rules to a format suitable for
-    # Telegram's rule engine. Currently returns intermediate JSON format.
+    # MessengerRuleBackend converts PATAS rules to a format suitable for
+    # platform rule engines. Currently returns intermediate JSON format.
     #
-    # TODO: Implement _convert_sql_to_telegram_format() based on actual
-    # Telegram rule engine specification (to be provided by Telegram team).
-    logger.info("Converting rules to Telegram format")
-    backend = TelegramRuleBackend(config.get("rule_backend", {}))
+    # TODO: Implement _convert_sql_to_platform_format() based on actual
+    # platform rule engine specification.
+    logger.info("Converting rules to platform format")
+    backend = MessengerRuleBackend(config.get("rule_backend", {}))
     
-    # Convert PATAS rules to Telegram format
+    # Convert PATAS rules to platform format
     # Note: In production, you'd use actual Rule objects from PATAS Core.
     # Here we work with the simplified dict format from run_batch_analysis().
-    telegram_rules = []
+    platform_rules = []
     for rule in result["rules"]:
-        telegram_rule = backend._convert_sql_to_telegram_format(rule["sql_expression"])
-        telegram_rule.update({
+        platform_rule = backend._convert_sql_to_platform_format(rule["sql_expression"])
+        platform_rule.update({
             "rule_id": f"patas_r{rule['id']}",
             "source": "patas_core",
             "semantic_pattern_id": f"cluster_{rule.get('pattern_id', 'unknown')}",
             "human_readable_pattern": rule.get("description", "Pattern"),
             "metrics": rule.get("evaluation", {}),
             "suggested_usage": _suggest_usage(rule.get("evaluation", {})),
-            "notes": "To be mapped into internal tg rule engine syntax",
+            "notes": "To be mapped into platform rule engine syntax",
         })
-        telegram_rules.append(telegram_rule)
+        platform_rules.append(platform_rule)
     
     # 5. Generate report
     logger.info(f"Generating report: {output_path}")
@@ -200,7 +200,7 @@ def _load_config(config_path: str) -> Dict[str, Any]:
     """
     Load configuration from YAML file.
     
-    Loads Telegram-specific configuration including:
+    Loads platform-specific configuration including:
     - Aggressiveness profile (conservative/balanced/aggressive)
     - Pattern mining settings (semantic/deterministic)
     - Rule lifecycle settings
@@ -265,11 +265,11 @@ def _generate_report(
     
     The report is designed for review by Telegram engineers and decision-makers.
     """
-    report = f"""# PATAS-for-Telegram PoC Report
+    report = f"""# PATAS Messenger Integration PoC Report
 
-**Pattern discovery and transparent rule engine for Telegram anti-spam**
+**Pattern discovery and transparent rule engine for anti-spam**
 
-This report shows the results of running PATAS on a Telegram-like dataset. PATAS discovers spam patterns (semantic + deterministic), generates rules with metrics, and provides signals/rules for integration - **not direct bans**.
+This report shows the results of running PATAS on a platform dataset. PATAS discovers spam patterns (semantic + deterministic), generates rules with metrics, and provides signals/rules for integration - **not direct bans**.
 
 ---
 
@@ -362,7 +362,7 @@ This report shows the results of running PATAS on a Telegram-like dataset. PATAS
 **PATAS is a signal engine, not enforcement**:
 - PATAS produces patterns, rules, and metrics
 - PATAS does **not** ban users directly
-- Telegram controls enforcement decisions
+- Platform controls enforcement decisions
 
 **Conservative Profile**:
 - Safe for low-impact auto actions (spam labeling, hiding, throttling)
@@ -372,9 +372,9 @@ This report shows the results of running PATAS on a Telegram-like dataset. PATAS
 **Balanced/Aggressive Profiles**:
 - For signals/investigation only
 - **NOT** for direct banning
-- Combine PATAS signals with Telegram's own signals before permanent enforcement
+- Combine PATAS signals with platform's own signals before permanent enforcement
 
-**Telegram MUST**:
+**Platform MUST**:
 - Combine PATAS signals with other signals (user reports, account history, etc.)
 - Review rules before activation
 - Monitor false positive rates
@@ -386,7 +386,7 @@ This report shows the results of running PATAS on a Telegram-like dataset. PATAS
 
 1. **Review Patterns**: Check if discovered patterns are meaningful and actionable
 2. **Validate Rules**: Verify rule precision and false positive rates
-3. **Integrate**: Map PATAS rules into Telegram's internal rule engine format
+3. **Integrate**: Map PATAS rules into platform's rule engine format
 4. **Deploy**: Start with Conservative profile, shadow mode, small subset of rules
 5. **Monitor**: Track rule performance, false positives, user complaints
 
@@ -410,7 +410,7 @@ def main():
     """CLI entry point."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="PATAS-for-Telegram PoC CLI")
+    parser = argparse.ArgumentParser(description="PATAS Messenger Integration PoC CLI")
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
     
     # PoC command
@@ -422,8 +422,8 @@ def main():
     )
     poc_parser.add_argument(
         "--input",
-        default="./sample_data/tg_logs.jsonl",
-        help="Path to Telegram logs (JSONL/CSV) (default: ./sample_data/tg_logs.jsonl)",
+        default="./sample_data/logs.jsonl",
+        help="Path to platform logs (JSONL/CSV) (default: ./sample_data/logs.jsonl)",
     )
     poc_parser.add_argument(
         "--out",

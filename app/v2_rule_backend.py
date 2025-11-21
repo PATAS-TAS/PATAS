@@ -1,7 +1,7 @@
 """
 Rule Backend abstraction for PATAS v2.
 
-Allows different rule export formats (SQL, ROL, Telegram-specific, etc.)
+Allows different rule export formats (SQL, ROL, platform-specific, etc.)
 """
 import logging
 from typing import List, Dict, Any, Optional

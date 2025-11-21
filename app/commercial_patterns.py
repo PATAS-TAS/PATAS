@@ -72,7 +72,7 @@ class CommercialPatterns:
             # Contact Information (Commercial Context)
             "contact_info": (
                 re.compile(
-                    r"(?i)\b(?:пиши|write|dm|pm|contact|связь|связаться|звоните|позвони|call|whatsapp|telegram|telegramm|тг|т\.?м\.?е\.?)\b",
+                    r"(?i)\b(?:пиши|write|dm|pm|contact|связь|связаться|звоните|позвони|call|whatsapp|messenger|тг|т\.?м\.?е\.?)\b",
                     re.IGNORECASE,
                 ),
                 "Contact request (commercial context)",
@@ -225,7 +225,7 @@ class CommercialPatterns:
             'заработок', 'доход', 'руб', 'usd', 'деньги', 'money', 'зарплат', 'salary',
             'подработк', 'part-time', 'акция', 'скидка', 'discount', 'promotion',
             'продам', 'купить', 'продать', 'buy', 'sell', 'sale',
-            'https', 't.me', 'telegram', 'групп', 'канал', 'group', 'channel',
+                'https', 't.me', 'messenger', 'групп', 'канал', 'group', 'channel',
             'вакансия', 'job', 'work', 'hiring', 'набор', 'требуются',
         ]
         return any(keyword in text_lower for keyword in commercial_keywords)
@@ -290,7 +290,7 @@ class CommercialPatterns:
                     score = min(0.5 + (match_count * 0.1), 0.85)
                 elif pattern_name in ["phishing_credentials", "phishing_suspicious_link"]:
                     score = min(0.65 + (match_count * 0.1), 0.9)  # Medium-high for phishing
-                elif pattern_name in ["multiple_urls", "telegram_link"]:
+                elif pattern_name in ["multiple_urls", "messenger_link"]:
                     score = min(0.5 + (match_count * 0.15), 0.9)
                 elif pattern_name == "phone":
                     score = 0.6

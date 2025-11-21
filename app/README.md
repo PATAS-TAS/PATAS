@@ -20,7 +20,7 @@ This directory contains the core PATAS application code - the main pattern disco
 
 **Rule Management:**
 - `v2_rule_lifecycle.py` - Rule lifecycle management (candidate → shadow → active → deprecated)
-- `v2_rule_backend.py` - Rule export to different backends (SQL, Telegram, etc.)
+- `v2_rule_backend.py` - Rule export to different backends (SQL, platform-specific, etc.)
 - `v2_promotion.py` - Rule promotion/rollback based on metrics and safety profiles
 - `v2_shadow_evaluation.py` - Shadow evaluation of rules on historical data
 
@@ -139,7 +139,7 @@ from app.repositories import MessageRepository
 
 # Ingest messages
 ingester = TASLogIngester(db)
-await ingester.ingest_from_source("telegram", days=7)
+await ingester.ingest_from_source("messenger", days=7)
 
 # Mine patterns
 pipeline = PatternMiningPipeline(db)
@@ -184,7 +184,7 @@ PATAS v2 provides comprehensive evaluation metrics for rule quality:
   - What pattern it detects
   - Precision, coverage, and hit metrics
 - **Enabled via API**: Use `include_explanations=true` parameter (default: false)
-- **Use Case**: Perfect for Telegram bot integration to help moderators understand rules
+- **Use Case**: Perfect for messenger bot integration to help moderators understand rules
 
 ### Risk Assessment
 

@@ -86,7 +86,7 @@ for rule in rules:
 
 #### Use Case
 
-Perfect for Telegram bot integration to help moderators understand why rules were created and what they detect.
+Perfect for messenger bot integration to help moderators understand why rules were created and what they detect.
 
 ### 3. Risk Assessment
 

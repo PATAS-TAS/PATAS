@@ -114,7 +114,7 @@ def generate_improved_sql_rules(
     sql += "      WHEN (pre.n_text LIKE '%avito.%' OR pre.n_text LIKE '%olx.%' OR pre.n_text LIKE '%t.me%' OR pre.n_text LIKE '%wa.me%' OR pre.n_text REGEXP '\\\\b(avito|olx)[\\\\s.]+[a-z0-9]') THEN 0.30\n"
     sql += "      -- Masked URLs (dots/spaces)\n"
     sql += "      WHEN pre.n_text REGEXP 'h[\\\\s.]+t[\\\\s.]+t[\\\\s.]+p' OR pre.n_text REGEXP 'w[\\\\s.]+w[\\\\s.]+w' THEN 0.25\n"
-    sql += "      -- Telegram handles (@username)\n"
+    sql += "      -- Platform handles (@username)\n"
     sql += "      WHEN pre.n_text REGEXP '@[a-z0-9_]{5,}' AND (pre.n_text LIKE '%прода%' OR pre.n_text LIKE '%куп%' OR pre.n_text LIKE '%работ%') THEN 0.35\n"
     sql += "      -- URLs with commercial keywords (strong signal)\n"
     sql += "      WHEN (pre.n_text LIKE '%http://%' OR pre.n_text LIKE '%https://%' OR pre.n_text LIKE '%www.%' OR pre.n_text LIKE '%t.me/%' OR pre.n_text LIKE '%wa.me/%')\n"

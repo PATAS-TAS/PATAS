@@ -1,12 +1,12 @@
 """
-Thin wrapper around PATAS Core interface for Telegram integration.
+Thin wrapper around PATAS Core interface for messenger platform integration.
 
 **Purpose**: Provide a stable, high-level interface to PATAS Core, hiding internal
-implementation details. This allows the Telegram integration layer to work with PATAS Core
+implementation details. This allows the messenger integration layer to work with PATAS Core
 without depending on its internal structure.
 
 **Key Function**: `run_batch_analysis()` - Main entry point for running PATAS Core analysis
-on a batch of Telegram messages.
+on a batch of platform messages.
 
 **For Developers**:
 - This module tries to import PATAS Core components
@@ -15,7 +15,7 @@ on a batch of Telegram messages.
 - The mock returns fake patterns/rules for demonstration purposes
 
 **Why This Exists**:
-- Decouples Telegram integration from PATAS Core internals
+- Decouples messenger integration from PATAS Core internals
 - Allows development/testing without full PATAS Core setup
 - Provides stable interface even if PATAS Core changes internally
 - Mock implementation enables PoC without PATAS Core dependency
@@ -71,7 +71,7 @@ async def run_batch_analysis(
     """
     Run PATAS Core analysis on a batch of messages.
     
-    This is the main entry point for Telegram integration. It orchestrates the complete
+    This is the main entry point for messenger platform integration. It orchestrates the complete
     PATAS Core workflow: ingestion → pattern mining → rule evaluation → metrics.
     
     **Workflow**:
@@ -86,7 +86,7 @@ async def run_batch_analysis(
     Args:
         messages: List of PATAS Message objects
         enable_semantic: Enable semantic pattern mining (default: True)
-            - Semantic mining is first-class feature for Telegram (catches LLM-generated variations)
+            - Semantic mining is first-class feature (catches LLM-generated variations)
         enable_deterministic: Enable deterministic pattern extraction (default: True)
             - Extracts URLs, keywords, signatures
         config: Optional configuration dict with:
@@ -254,7 +254,7 @@ def _mock_batch_analysis(
     Mock implementation for when PATAS Core is not available.
     
     Returns fake patterns and rules for local illustration/demo purposes only.
-    This allows the Telegram integration layer to be tested and demonstrated
+    This allows the messenger integration layer to be tested and demonstrated
     without requiring a full PATAS Core installation.
     
     **Note**: In production, PATAS Core should always be available.
