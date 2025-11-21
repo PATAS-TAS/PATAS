@@ -55,6 +55,8 @@ class PatternMiningPipeline:
         use_semantic: bool = False,
         embedding_engine: Optional[Any] = None,
         enable_llm_validation: bool = True,  # Enable LLM validation by default if LLM available
+        since_message_id: Optional[int] = None,  # Process only messages after this ID (incremental mining)
+        messages: Optional[List[Message]] = None,  # Pre-filtered messages to process (used by two-stage pipeline)
     ) -> Dict[str, Any]:
         """
         Mine patterns from recent messages.
@@ -63,6 +65,8 @@ class PatternMiningPipeline:
             days: Number of days of messages to analyze
             min_spam_count: Minimum spam messages required for pattern
             use_llm: Whether to use LLM for pattern refinement
+            since_message_id: Process only messages after this ID (incremental mining)
+            messages: Pre-filtered messages to process (if provided, skips get_recent and uses this list)
         
         Returns:
             Dict with stats: patterns_created, rules_created, etc.
@@ -88,25 +92,35 @@ class PatternMiningPipeline:
                         "message": "Pattern mining is already running on another instance",
                     }
         
-        logger.info(f"Mining patterns from last {days} days (chunk_size={self.chunk_size})")
+        if since_message_id:
+            logger.info(f"Mining patterns from last {days} days (incremental, after message ID {since_message_id}, chunk_size={self.chunk_size})")
+        else:
+            logger.info(f"Mining patterns from last {days} days (chunk_size={self.chunk_size})")
         
         # Create checkpoint for progress tracking
         checkpoint = await self.checkpoint_repo.create(
             days=days,
             min_spam_count=min_spam_count,
             stage="processing",
-            metadata={"chunk_size": self.chunk_size, "use_llm": use_llm, "use_semantic": use_semantic},
+            metadata={"chunk_size": self.chunk_size, "use_llm": use_llm, "use_semantic": use_semantic, "incremental": since_message_id is not None},
         )
         checkpoint_id = checkpoint.id
         logger.info(f"Created checkpoint {checkpoint_id} for pattern mining")
         
         try:
-            # Get spam messages (will process in chunks for feature extraction)
-            spam_messages = await self.message_repo.get_recent(
-                days=days,
-                limit=100000,  # Large limit, will process in chunks later
-                is_spam=True,
-            )
+            # Use pre-filtered messages if provided (for two-stage pipeline Stage 2)
+            if messages is not None:
+                spam_messages = messages
+                logger.info(f"Using pre-filtered messages: {len(spam_messages)} messages")
+            else:
+                # Get spam messages (will process in chunks for feature extraction)
+                # If since_message_id is provided, only get messages after that ID (incremental mining)
+                spam_messages = await self.message_repo.get_recent(
+                    days=days,
+                    limit=100000,  # Large limit, will process in chunks later
+                    is_spam=True,
+                    after_id=since_message_id,  # Filter by message ID if incremental
+                )
             
             # Get sample of ham messages for context and quality filtering
             ham_messages = await self.message_repo.get_recent(

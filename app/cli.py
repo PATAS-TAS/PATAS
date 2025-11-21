@@ -68,11 +68,24 @@ async def cmd_mine_patterns(
     use_llm: bool = False,
     use_semantic: bool = True,  # Enable semantic mining by default
     two_stage: bool = None,  # Auto-detect from config if None
+    since_checkpoint: Optional[int] = None,  # Resume from checkpoint ID
 ):
     """Run pattern mining pipeline on recent messages."""
     from app.database import AsyncSessionLocal
+    from app.repositories import CheckpointRepository
     
     async with AsyncSessionLocal() as db:
+        # Handle incremental mining from checkpoint
+        since_message_id = None
+        if since_checkpoint:
+            checkpoint_repo = CheckpointRepository(db)
+            checkpoint = await checkpoint_repo.get_by_id(since_checkpoint)
+            if checkpoint and checkpoint.last_processed_message_id:
+                since_message_id = checkpoint.last_processed_message_id
+                logger.info(f"Resuming from checkpoint {since_checkpoint}, last processed message ID: {since_message_id}")
+            else:
+                logger.warning(f"Checkpoint {since_checkpoint} not found or has no last_processed_message_id, starting from beginning")
+        
         # Create LLM engine if needed
         import os
         api_key = os.getenv("PATAS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
@@ -122,14 +135,25 @@ async def cmd_mine_patterns(
             logger.info("Using single-stage pattern mining pipeline")
         
         # Run mining (with semantic analysis if enabled)
-        result = await pipeline.mine_patterns(
-            days=days,
-            min_spam_count=10,
-            use_llm=use_llm,
-            llm_engine=mining_engine,
-            use_semantic=use_semantic and bool(embedding_engine),
-            embedding_engine=embedding_engine,
-        )
+        if two_stage:
+            result = await pipeline.mine_patterns(
+                days=days,
+                min_spam_count=10,
+                use_llm=use_llm,
+                llm_engine=mining_engine,
+                embedding_engine=embedding_engine,
+                since_message_id=since_message_id,  # Support incremental mining
+            )
+        else:
+            result = await pipeline.mine_patterns(
+                days=days,
+                min_spam_count=10,
+                use_llm=use_llm,
+                llm_engine=mining_engine,
+                use_semantic=use_semantic and bool(embedding_engine),
+                embedding_engine=embedding_engine,
+                since_message_id=since_message_id,
+            )
         
         # Log results
         if two_stage and 'stage1_patterns' in result:
@@ -460,9 +484,27 @@ def main():
         asyncio.run(cmd_ingest_logs(source=source, since_days=since_days, limit=limit))
     
     elif command == "mine-patterns":
-        days = int(sys.argv[2]) if len(sys.argv) > 2 else 7
-        use_llm = sys.argv[3].lower() == "true" if len(sys.argv) > 3 else False
-        asyncio.run(cmd_mine_patterns(days=days, use_llm=use_llm))
+        # Parse arguments: days, use_llm, --since-checkpoint <id>
+        days = 7
+        use_llm = False
+        since_checkpoint = None
+        
+        i = 2
+        while i < len(sys.argv):
+            arg = sys.argv[i]
+            if arg == "--since-checkpoint" and i + 1 < len(sys.argv):
+                since_checkpoint = int(sys.argv[i + 1])
+                i += 2
+            elif arg == "--use-llm":
+                use_llm = True
+                i += 1
+            elif arg.isdigit():
+                days = int(arg)
+                i += 1
+            else:
+                i += 1
+        
+        asyncio.run(cmd_mine_patterns(days=days, use_llm=use_llm, since_checkpoint=since_checkpoint))
     
     elif command == "resume-mining":
         checkpoint_id = int(sys.argv[2]) if len(sys.argv) > 2 else None

@@ -105,6 +105,7 @@ class MinePatternsRequest(BaseModel):
     days: int = Field(7, ge=1, le=365, description="Number of days to analyze")
     use_llm: bool = Field(False, description="Use LLM for pattern discovery")
     min_spam_count: int = Field(10, ge=1, description="Minimum spam messages required")
+    since_checkpoint: Optional[int] = Field(None, description="Resume from checkpoint ID (incremental mining)")
 
 
 class MinePatternsResponse(BaseModel):
@@ -114,6 +115,15 @@ class MinePatternsResponse(BaseModel):
     messages_processed: int
     spam_count: int
     ham_count: int
+    # Two-stage pipeline metrics (if using two-stage)
+    stage1_messages_count: Optional[int] = Field(None, description="Number of messages processed in Stage 1")
+    stage2_messages_count: Optional[int] = Field(None, description="Number of messages processed in Stage 2")
+    stage2_percentage: Optional[float] = Field(None, description="Percentage of messages that went to Stage 2")
+    cost_savings_estimate: Optional[float] = Field(None, description="Estimated cost savings (1 - stage2_percentage)")
+    stage1_patterns: Optional[int] = Field(None, description="Patterns created in Stage 1")
+    stage1_rules: Optional[int] = Field(None, description="Rules created in Stage 1")
+    stage2_patterns: Optional[int] = Field(None, description="Patterns created in Stage 2")
+    stage2_rules: Optional[int] = Field(None, description="Rules created in Stage 2")
 
 
 class EvalRulesRequest(BaseModel):

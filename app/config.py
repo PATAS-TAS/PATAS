@@ -81,6 +81,11 @@ class Settings(BaseSettings):
     enable_semantic_mining: bool = True  # Enable semantic pattern mining
     use_dbscan_clustering: bool = True  # Use DBSCAN instead of naive clustering
     
+    # Shadow evaluation optimization
+    max_shadow_rules_to_evaluate: Optional[int] = None  # Limit number of shadow rules to evaluate (top-N by quality tier)
+    shadow_evaluation_sample_size: Optional[int] = None  # Sample size for evaluation on large datasets (LIMIT in SQL)
+    shadow_evaluation_parallel_workers: int = 4  # Number of parallel workers for evaluation
+    
     # Two-stage processing
     enable_two_stage_processing: bool = True  # Enable two-stage pipeline
     stage1_chunk_size: int = 10000  # Large chunks for fast scanning

@@ -5,7 +5,7 @@ Evaluates rules in SHADOW status against recent messages
 and computes precision, recall, coverage metrics.
 """
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -69,6 +69,10 @@ class ShadowEvaluationService:
         period_end = datetime.now(timezone.utc)
         period_start = period_end - timedelta(days=days)
         
+        # Check if sampling is enabled for large datasets
+        from app.config import settings
+        sample_size = settings.shadow_evaluation_sample_size
+        
         # Execute rule SQL against messages table
         # Validate SQL safety first
         sql_expression = rule.sql_expression
@@ -91,6 +95,11 @@ class ShadowEvaluationService:
                 # If SQL doesn't reference messages table, we can't evaluate it
                 logger.error(f"Rule {rule_id} SQL does not reference messages table")
                 return None
+            
+            # Add sampling LIMIT if configured
+            if sample_size and "LIMIT" not in count_sql.upper():
+                count_sql = f"{count_sql} LIMIT {sample_size}"
+                logger.info(f"Rule {rule_id}: using sampling with limit {sample_size}")
             
             # Execute query to get matching message IDs and labels
             result = await self.db.execute(text(count_sql))
@@ -221,15 +230,83 @@ class ShadowEvaluationService:
         """
         Evaluate all rules in SHADOW status.
         
+        Supports:
+        - Filtering by quality tier (top-N rules if max_shadow_rules_to_evaluate is set)
+        - Parallel evaluation (configurable number of workers)
+        - Sampling for large datasets (if shadow_evaluation_sample_size is set)
+        
         Returns:
             Dict mapping rule_id to evaluation result (or None if failed)
         """
-        shadow_rules = await self.rule_repo.get_by_status(RuleStatus.SHADOW)
-        results = {}
+        from app.config import settings
+        import asyncio
         
-        for rule in shadow_rules:
-            evaluation = await self.evaluate_rule(rule.id, days=days, min_sample_size=min_sample_size)
-            results[rule.id] = evaluation
+        shadow_rules = await self.rule_repo.get_by_status(RuleStatus.SHADOW)
+        
+        # Filter rules by quality tier if max_shadow_rules_to_evaluate is set
+        if settings.max_shadow_rules_to_evaluate and len(shadow_rules) > settings.max_shadow_rules_to_evaluate:
+            logger.info(f"Filtering {len(shadow_rules)} shadow rules to top {settings.max_shadow_rules_to_evaluate} by quality tier")
+            
+            # Get latest evaluations to sort by quality
+            from app.repositories import RuleEvaluationRepository
+            eval_repo = RuleEvaluationRepository(self.db)
+            
+            # Get evaluations for all rules
+            rule_qualities = []
+            for rule in shadow_rules:
+                latest_eval = await eval_repo.get_latest_for_rule(rule.id)
+                if latest_eval and latest_eval.precision is not None:
+                    # Use precision as quality score (higher is better)
+                    quality_score = latest_eval.precision
+                else:
+                    # New rules without evaluation get default score
+                    quality_score = 0.5
+                rule_qualities.append((rule.id, quality_score, rule))
+            
+            # Sort by quality (descending) and take top-N
+            rule_qualities.sort(key=lambda x: x[1], reverse=True)
+            shadow_rules = [rq[2] for rq in rule_qualities[:settings.max_shadow_rules_to_evaluate]]
+            logger.info(f"Selected top {len(shadow_rules)} rules by quality tier")
+        
+        if not shadow_rules:
+            logger.info("No shadow rules to evaluate")
+            return {}
+        
+        # Parallel evaluation
+        workers = settings.shadow_evaluation_parallel_workers
+        if workers > 1 and len(shadow_rules) > 1:
+            logger.info(f"Evaluating {len(shadow_rules)} rules with {workers} parallel workers")
+            
+            # Split rules into chunks for parallel processing
+            chunks = []
+            for i in range(workers):
+                chunk = [rule for j, rule in enumerate(shadow_rules) if j % workers == i]
+                if chunk:
+                    chunks.append(chunk)
+            
+            # Evaluate chunks in parallel
+            async def evaluate_chunk(chunk: List[Rule]) -> Dict[int, Optional[RuleEvaluation]]:
+                chunk_results = {}
+                for rule in chunk:
+                    evaluation = await self.evaluate_rule(rule.id, days=days, min_sample_size=min_sample_size)
+                    chunk_results[rule.id] = evaluation
+                return chunk_results
+            
+            chunk_results = await asyncio.gather(*[evaluate_chunk(chunk) for chunk in chunks])
+            
+            # Merge results
+            results = {}
+            for chunk_result in chunk_results:
+                results.update(chunk_result)
+            
+            logger.info(f"Evaluated {len(results)} rules in parallel")
+        else:
+            # Sequential evaluation (fallback or single worker)
+            logger.info(f"Evaluating {len(shadow_rules)} rules sequentially")
+            results = {}
+            for rule in shadow_rules:
+                evaluation = await self.evaluate_rule(rule.id, days=days, min_sample_size=min_sample_size)
+                results[rule.id] = evaluation
         
         return results
 

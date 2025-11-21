@@ -61,6 +61,7 @@ class TwoStagePatternMiningPipeline:
         llm_engine: Optional[Any] = None,
         embedding_engine: Optional[Any] = None,
         enable_llm_validation: bool = True,
+        since_message_id: Optional[int] = None,  # Process only messages after this ID (incremental mining)
     ) -> Dict[str, Any]:
         """
         Mine patterns using two-stage approach.
@@ -90,10 +91,12 @@ class TwoStagePatternMiningPipeline:
         
         try:
             # Get all spam messages
+            # If since_message_id is provided, only get messages after that ID (incremental mining)
             spam_messages = await self.message_repo.get_recent(
                 days=days,
                 limit=1000000,  # Very large limit for Stage 1
                 is_spam=True,
+                after_id=since_message_id,  # Filter by message ID if incremental
             )
             
             if len(spam_messages) < min_spam_count:
@@ -107,10 +110,21 @@ class TwoStagePatternMiningPipeline:
                     "checkpoint_id": checkpoint_id,
                 }
             
-            logger.info(f"Processing {len(spam_messages)} spam messages in two stages")
+            total_messages = len(spam_messages)
+            
+            # Get sample of ham messages for statistics
+            ham_messages = await self.message_repo.get_recent(
+                days=days,
+                limit=min(1000, total_messages // 10) if total_messages > 0 else 100,
+                is_spam=False,
+                after_id=since_message_id,  # Filter by message ID if incremental
+            )
+            
+            logger.info(f"Processing {total_messages} spam messages and {len(ham_messages)} ham messages in two stages")
             
             # ===== Stage 1: Fast Scanning =====
             logger.info("=== Stage 1: Fast Scanning (deterministic patterns) ===")
+            logger.info(f"Stage 1: processing {total_messages} messages, looking for deterministic patterns")
             stage1_pipeline = PatternMiningPipeline(
                 db=self.db,
                 mining_engine=None,  # No LLM in Stage 1
@@ -123,11 +137,12 @@ class TwoStagePatternMiningPipeline:
                 use_llm=False,  # No LLM
                 use_semantic=False,  # No semantic mining
                 embedding_engine=None,
+                since_message_id=since_message_id,  # Support incremental mining
             )
             
             stage1_patterns = stage1_result.get("patterns_created", 0)
             stage1_rules = stage1_result.get("rules_created", 0)
-            logger.info(f"Stage 1 complete: {stage1_patterns} patterns, {stage1_rules} rules")
+            logger.info(f"Stage 1 complete: processed {total_messages} messages, found {stage1_patterns} patterns, {stage1_rules} rules")
             
             # Update checkpoint after Stage 1
             await self.checkpoint_repo.update(
@@ -146,6 +161,9 @@ class TwoStagePatternMiningPipeline:
                 threshold=self.suspiciousness_threshold,
             )
             
+            total_patterns_found = stage1_patterns  # Total patterns from Stage 1
+            logger.info(f"Stage 2: filtering {len(suspicious_pattern_ids)} suspicious patterns from {total_patterns_found} total patterns")
+            
             if not suspicious_pattern_ids:
                 logger.warning("No suspicious patterns found for Stage 2")
                 await self.checkpoint_repo.update(
@@ -153,15 +171,31 @@ class TwoStagePatternMiningPipeline:
                     status=CheckpointStatus.COMPLETED,
                     stage="completed",
                 )
+                stage2_percentage = 0.0
+                cost_savings = 1.0
+                # Get ham messages for statistics
+                ham_messages = await self.message_repo.get_recent(
+                    days=days,
+                    limit=min(1000, total_messages // 10) if total_messages > 0 else 100,
+                    is_spam=False,
+                    after_id=since_message_id,
+                )
+                
                 return {
                     "patterns_created": stage1_patterns,
                     "rules_created": stage1_rules,
-                    "messages_processed": len(spam_messages),
+                    "messages_processed": total_messages,
+                    "spam_count": total_messages,
+                    "ham_count": len(ham_messages),
                     "stage1_patterns": stage1_patterns,
                     "stage1_rules": stage1_rules,
                     "stage2_patterns": 0,
                     "stage2_rules": 0,
                     "suspicious_patterns_count": 0,
+                    "stage1_messages_count": total_messages,
+                    "stage2_messages_count": 0,
+                    "stage2_percentage": stage2_percentage,
+                    "cost_savings_estimate": cost_savings,
                     "checkpoint_id": checkpoint_id,
                 }
             
@@ -176,7 +210,12 @@ class TwoStagePatternMiningPipeline:
                 suspicious_pattern_ids,
             )
             
-            logger.info(f"Analyzing {len(suspicious_messages)} messages in Stage 2")
+            stage2_messages_count = len(suspicious_messages)
+            stage2_percentage = (stage2_messages_count / total_messages * 100) if total_messages > 0 else 0.0
+            cost_savings = 1.0 - (stage2_messages_count / total_messages) if total_messages > 0 else 1.0
+            
+            logger.info(f"Stage 2: analyzing {stage2_messages_count} messages ({stage2_percentage:.2f}% of total {total_messages} messages)")
+            logger.info(f"Stage 2: cost savings estimate: {cost_savings:.1%} (only {stage2_percentage:.2f}% of messages require expensive LLM/embedding analysis)")
             
             stage2_pipeline = PatternMiningPipeline(
                 db=self.db,
@@ -185,6 +224,7 @@ class TwoStagePatternMiningPipeline:
             )
             
             # Run deep analysis on suspicious messages only
+            # Pass suspicious_messages directly to avoid re-fetching all messages
             stage2_result = await stage2_pipeline.mine_patterns(
                 days=days,
                 min_spam_count=3,  # Lower threshold for Stage 2
@@ -193,6 +233,7 @@ class TwoStagePatternMiningPipeline:
                 use_semantic=bool(embedding_engine),
                 embedding_engine=embedding_engine,
                 enable_llm_validation=enable_llm_validation,
+                messages=suspicious_messages,  # Pass pre-filtered messages to avoid re-fetching
             )
             
             stage2_patterns = stage2_result.get("patterns_created", 0)
@@ -225,13 +266,19 @@ class TwoStagePatternMiningPipeline:
             return {
                 "patterns_created": total_patterns,
                 "rules_created": total_rules,
-                "messages_processed": len(spam_messages),
+                "messages_processed": total_messages,
+                "spam_count": total_messages,
+                "ham_count": len(ham_messages),
                 "stage1_patterns": stage1_patterns,
                 "stage1_rules": stage1_rules,
                 "stage2_patterns": stage2_patterns,
                 "stage2_rules": stage2_rules,
                 "suspicious_patterns_count": len(suspicious_pattern_ids),
-                "suspicious_messages_count": len(suspicious_messages),
+                "suspicious_messages_count": stage2_messages_count,
+                "stage1_messages_count": total_messages,
+                "stage2_messages_count": stage2_messages_count,
+                "stage2_percentage": stage2_percentage,
+                "cost_savings_estimate": cost_savings,
                 "checkpoint_id": checkpoint_id,
             }
         except Exception as e:
@@ -299,10 +346,13 @@ class TwoStagePatternMiningPipeline:
         
         try:
             # Get all spam messages
+            # Support incremental mining from checkpoint
+            last_processed_id = checkpoint.last_processed_message_id
             spam_messages = await self.message_repo.get_recent(
                 days=checkpoint.days,
                 limit=1000000,
                 is_spam=True,
+                after_id=last_processed_id,  # Filter by message ID if incremental
             )
             
             if len(spam_messages) < checkpoint.min_spam_count:
@@ -346,6 +396,7 @@ class TwoStagePatternMiningPipeline:
                         min_spam_count=checkpoint.min_spam_count,
                         use_llm=False,
                         use_semantic=False,
+                        since_message_id=last_processed_id,  # Support incremental mining
                     )
                 
                 stage1_patterns = stage1_result.get("patterns_created", 0)
@@ -385,15 +436,31 @@ class TwoStagePatternMiningPipeline:
                     )
                     stage1_patterns = metadata.get("stage1_patterns", 0)
                     stage1_rules = metadata.get("stage1_rules", 0)
+                    total_messages = len(spam_messages)
+                    
+                    # Get ham messages for statistics
+                    ham_messages = await self.message_repo.get_recent(
+                        days=checkpoint.days,
+                        limit=min(1000, total_messages // 10) if total_messages > 0 else 100,
+                        is_spam=False,
+                        after_id=last_processed_id,
+                    )
+                    
                     return {
                         "patterns_created": stage1_patterns,
                         "rules_created": stage1_rules,
-                        "messages_processed": len(spam_messages),
+                        "messages_processed": total_messages,
+                        "spam_count": total_messages,
+                        "ham_count": len(ham_messages),
                         "stage1_patterns": stage1_patterns,
                         "stage1_rules": stage1_rules,
                         "stage2_patterns": 0,
                         "stage2_rules": 0,
                         "suspicious_patterns_count": 0,
+                        "stage1_messages_count": total_messages,
+                        "stage2_messages_count": 0,
+                        "stage2_percentage": 0.0,
+                        "cost_savings_estimate": 1.0,
                         "checkpoint_id": checkpoint_id,
                     }
                 
@@ -414,6 +481,7 @@ class TwoStagePatternMiningPipeline:
                 )
                 
                 # Run deep analysis on suspicious messages only
+                # Pass suspicious_messages directly to avoid re-fetching all messages
                 stage2_result = await stage2_pipeline.mine_patterns(
                     days=checkpoint.days,
                     min_spam_count=3,
@@ -422,6 +490,7 @@ class TwoStagePatternMiningPipeline:
                     use_semantic=bool(embedding_engine),
                     embedding_engine=embedding_engine,
                     enable_llm_validation=enable_llm_validation,
+                    messages=suspicious_messages,  # Pass pre-filtered messages to avoid re-fetching
                 )
                 
                 stage2_patterns = stage2_result.get("patterns_created", 0)
@@ -435,10 +504,15 @@ class TwoStagePatternMiningPipeline:
             # Summary
             total_patterns = stage1_patterns + stage2_patterns
             total_rules = stage1_rules + stage2_rules
+            total_messages = len(spam_messages)
+            stage2_messages_count = len(suspicious_messages) if 'suspicious_messages' in locals() else 0
+            stage2_percentage = (stage2_messages_count / total_messages * 100) if total_messages > 0 else 0.0
+            cost_savings = 1.0 - (stage2_messages_count / total_messages) if total_messages > 0 else 1.0
             
             logger.info(f"Two-stage mining complete: {total_patterns} patterns, {total_rules} rules")
             logger.info(f"  Stage 1: {stage1_patterns} patterns, {stage1_rules} rules (fast scan)")
             logger.info(f"  Stage 2: {stage2_patterns} patterns, {stage2_rules} rules (deep analysis)")
+            logger.info(f"  Stage 2: analyzed {stage2_messages_count} messages ({stage2_percentage:.2f}% of total), cost savings: {cost_savings:.1%}")
             
             # Mark checkpoint as completed
             await self.checkpoint_repo.update(
@@ -456,16 +530,30 @@ class TwoStagePatternMiningPipeline:
                 },
             )
             
+            # Get ham messages for statistics
+            ham_messages = await self.message_repo.get_recent(
+                days=checkpoint.days,
+                limit=min(1000, total_messages // 10) if total_messages > 0 else 100,
+                is_spam=False,
+                after_id=last_processed_id,
+            )
+            
             return {
                 "patterns_created": total_patterns,
                 "rules_created": total_rules,
-                "messages_processed": len(spam_messages),
+                "messages_processed": total_messages,
+                "spam_count": total_messages,
+                "ham_count": len(ham_messages),
                 "stage1_patterns": stage1_patterns,
                 "stage1_rules": stage1_rules,
                 "stage2_patterns": stage2_patterns,
                 "stage2_rules": stage2_rules,
                 "suspicious_patterns_count": len(suspicious_pattern_ids) if 'suspicious_pattern_ids' in locals() else 0,
-                "suspicious_messages_count": len(suspicious_messages) if 'suspicious_messages' in locals() else 0,
+                "suspicious_messages_count": stage2_messages_count,
+                "stage1_messages_count": total_messages,
+                "stage2_messages_count": stage2_messages_count,
+                "stage2_percentage": stage2_percentage,
+                "cost_savings_estimate": cost_savings,
                 "checkpoint_id": checkpoint_id,
                 "resumed": True,
             }

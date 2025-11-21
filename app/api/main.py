@@ -145,19 +145,67 @@ async def mine_patterns(
             timeout_seconds=settings.llm_timeout_seconds,
         )
     
-    # Create pipeline
-    pipeline = PatternMiningPipeline(
-        db=db,
-        mining_engine=mining_engine,
-        chunk_size=settings.pattern_mining_chunk_size,
-    )
+    # Create embedding engine if needed for two-stage or semantic mining
+    embedding_engine = None
+    if getattr(settings, 'enable_semantic_mining', True) or getattr(settings, 'enable_two_stage_processing', True):
+        import os
+        api_key = os.getenv("PATAS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY") or getattr(settings, 'embedding_api_key', '')
+        if api_key:
+            embedding_engine = create_embedding_engine(
+                provider=getattr(settings, 'embedding_provider', 'openai'),
+                api_key=api_key,
+                model=getattr(settings, 'embedding_model', 'text-embedding-3-small'),
+                batch_size=getattr(settings, 'embedding_batch_size', 2048),
+                base_url=getattr(settings, 'embedding_base_url', '') if getattr(settings, 'embedding_provider', 'openai') == "local" else None,
+                timeout_seconds=getattr(settings, 'embedding_timeout_seconds', 30.0),
+            )
     
-    # Run mining
-    result = await pipeline.mine_patterns(
-        days=request.days,
-        min_spam_count=request.min_spam_count,
-        use_llm=request.use_llm,
-    )
+    # Handle incremental mining from checkpoint
+    since_message_id = None
+    if request.since_checkpoint:
+        from app.repositories import CheckpointRepository
+        checkpoint_repo = CheckpointRepository(db)
+        checkpoint = await checkpoint_repo.get_by_id(request.since_checkpoint)
+        if checkpoint and checkpoint.last_processed_message_id:
+            since_message_id = checkpoint.last_processed_message_id
+            logger.info(f"Using incremental mining from checkpoint {request.since_checkpoint}, last processed message ID: {since_message_id}")
+    
+    # Use two-stage pipeline if enabled
+    use_two_stage = getattr(settings, 'enable_two_stage_processing', True)
+    
+    if use_two_stage:
+        from app.v2_two_stage_pipeline import TwoStagePatternMiningPipeline
+        pipeline = TwoStagePatternMiningPipeline(
+            db=db,
+            stage1_chunk_size=getattr(settings, 'stage1_chunk_size', 10000),
+            stage2_chunk_size=getattr(settings, 'stage2_chunk_size', 1000),
+            suspiciousness_threshold=getattr(settings, 'suspiciousness_threshold', 0.03),
+        )
+        
+        # Run two-stage mining
+        result = await pipeline.mine_patterns(
+            days=request.days,
+            min_spam_count=request.min_spam_count,
+            use_llm=request.use_llm and bool(mining_engine),
+            llm_engine=mining_engine,
+            embedding_engine=embedding_engine,
+            since_message_id=since_message_id,  # Support incremental mining
+        )
+    else:
+        # Use single-stage pipeline
+        pipeline = PatternMiningPipeline(
+            db=db,
+            mining_engine=mining_engine,
+            chunk_size=settings.pattern_mining_chunk_size,
+        )
+        
+        # Run mining
+        result = await pipeline.mine_patterns(
+            days=request.days,
+            min_spam_count=request.min_spam_count,
+            use_llm=request.use_llm,
+            since_message_id=since_message_id,  # Support incremental mining
+        )
     
     if "error" in result:
         raise HTTPException(
@@ -171,6 +219,14 @@ async def mine_patterns(
         messages_processed=result.get("messages_processed", 0),
         spam_count=result.get("spam_count", 0),
         ham_count=result.get("ham_count", 0),
+        stage1_messages_count=result.get("stage1_messages_count"),
+        stage2_messages_count=result.get("stage2_messages_count"),
+        stage2_percentage=result.get("stage2_percentage"),
+        cost_savings_estimate=result.get("cost_savings_estimate"),
+        stage1_patterns=result.get("stage1_patterns"),
+        stage1_rules=result.get("stage1_rules"),
+        stage2_patterns=result.get("stage2_patterns"),
+        stage2_rules=result.get("stage2_rules"),
     )
 
 

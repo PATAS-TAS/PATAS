@@ -90,3 +90,6 @@ SQL_PARSER_IMPROVEMENTS.md
 VERIFICATION_REPORT.md
 docs/SECURITY_AUDIT_CHECKLIST.md
 docs/LOAD_TESTING_GUIDE.md
+
+# Wiki content files (local only, copy to GitHub Wiki manually)
+wiki_*.md
