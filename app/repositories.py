@@ -174,15 +174,15 @@ class MessageRepository:
         else:
             # General case
             query = select(Message).where(Message.timestamp >= cutoff)
-            
-            if is_spam is not None:
-                query = query.where(Message.is_spam == is_spam)
-            
-            if after_id is not None:
-                # Use primary key index for id comparison (very fast)
-                query = query.where(Message.id > after_id)
-            
-            query = query.order_by(Message.timestamp.desc())
+        
+        if is_spam is not None:
+            query = query.where(Message.is_spam == is_spam)
+        
+        if after_id is not None:
+            # Use primary key index for id comparison (very fast)
+            query = query.where(Message.id > after_id)
+        
+        query = query.order_by(Message.timestamp.desc())
         
         if limit:
             query = query.limit(limit)
