@@ -125,6 +125,7 @@ class Pattern(Base):
     type = Column(SQLEnum(PatternType), nullable=False, index=True)
     description = Column(Text, nullable=False)
     examples = Column(JSON, nullable=True)  # Representative message texts
+    matched_message_ids = Column(JSON, nullable=True)  # List of message IDs that matched this pattern (for traceability)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -197,8 +198,8 @@ class PatternMiningCheckpoint(Base):
     patterns_in_progress = Column(JSON, nullable=True)  # Intermediate pattern results
     stage = Column(String, nullable=True)  # "stage1", "stage2", "completed" for two-stage pipeline
     
-    # Metadata
-    metadata = Column(JSON, nullable=True)  # Additional info: chunk_index, aggregated_signals snapshot, etc.
+    # Metadata (renamed to avoid SQLAlchemy Base.metadata conflict)
+    checkpoint_metadata = Column("metadata", JSON, nullable=True)  # Additional info: chunk_index, aggregated_signals snapshot, etc.  # Additional info: chunk_index, aggregated_signals snapshot, etc.
 
     __table_args__ = (
         Index("ix_checkpoints_status_updated", "status", "last_updated"),

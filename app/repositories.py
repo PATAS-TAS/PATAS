@@ -155,23 +155,54 @@ class MessageRepository:
         is_spam: Optional[bool] = None,
         after_id: Optional[int] = None,
     ) -> List[Message]:
-        """Get recent messages within time window."""
+        """
+        Get recent messages within time window.
+        
+        Optimized for performance:
+        - Uses index on (timestamp, is_spam) when both filters are present
+        - Uses index on id for incremental mining (after_id)
+        - Orders by timestamp desc for efficient retrieval
+        """
         cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-        query = select(Message).where(Message.timestamp >= cutoff)
         
-        if is_spam is not None:
-            query = query.where(Message.is_spam == is_spam)
-        
-        if after_id is not None:
-            query = query.where(Message.id > after_id)
-        
-        query = query.order_by(Message.timestamp.desc())
+        # Optimize query: use composite index (timestamp, is_spam) when both filters present
+        if is_spam is not None and after_id is None:
+            # Use composite index ix_messages_timestamp_spam
+            query = select(Message).where(
+                and_(Message.timestamp >= cutoff, Message.is_spam == is_spam)
+            ).order_by(Message.timestamp.desc())
+        else:
+            # General case
+            query = select(Message).where(Message.timestamp >= cutoff)
+            
+            if is_spam is not None:
+                query = query.where(Message.is_spam == is_spam)
+            
+            if after_id is not None:
+                # Use primary key index for id comparison (very fast)
+                query = query.where(Message.id > after_id)
+            
+            query = query.order_by(Message.timestamp.desc())
         
         if limit:
             query = query.limit(limit)
         
         result = await self.db.execute(query)
         return list(result.scalars().all())
+    
+    async def get_latest(self) -> Optional[Message]:
+        """Get the latest message by ID (for incremental mining)."""
+        result = await self.db.execute(
+            select(Message).order_by(Message.id.desc()).limit(1)
+        )
+        return result.scalar_one_or_none()
+    
+    async def get_by_id(self, message_id: int) -> Optional[Message]:
+        """Get message by ID."""
+        result = await self.db.execute(
+            select(Message).where(Message.id == message_id)
+        )
+        return result.scalar_one_or_none()
 
     async def get_existing_external_ids(
         self,
@@ -347,12 +378,14 @@ class PatternRepository:
         type: PatternType,
         description: str,
         examples: Optional[List[str]] = None,
+        matched_message_ids: Optional[List[int]] = None,
     ) -> Pattern:
         """Create a new pattern."""
         pattern = Pattern(
             type=type,
             description=description,
             examples=examples or [],
+            matched_message_ids=matched_message_ids or [],
         )
         self.db.add(pattern)
         await self.db.commit()
@@ -549,7 +582,7 @@ class CheckpointRepository:
         if stage is not None:
             checkpoint.stage = stage
         if metadata is not None:
-            checkpoint.metadata = metadata
+            checkpoint.checkpoint_metadata = metadata
         if status is not None:
             checkpoint.status = status
         

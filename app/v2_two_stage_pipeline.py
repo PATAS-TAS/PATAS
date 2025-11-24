@@ -368,7 +368,7 @@ class TwoStagePatternMiningPipeline:
             
             # Determine which stage to resume from
             current_stage = checkpoint.stage or "stage1"
-            metadata = checkpoint.metadata or {}
+            metadata = checkpoint.checkpoint_metadata or {}
             
             if current_stage == "stage1" or not current_stage:
                 # Resume or start Stage 1

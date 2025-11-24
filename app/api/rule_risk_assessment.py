@@ -69,6 +69,10 @@ async def assess_rule_risk(
     """
     Assess risk of false positives for a rule.
     
+    Uses new two-category system:
+    - AUTO_SAFE: Can be applied automatically
+    - REQUIRES_REVIEW: Requires LLM or manual review
+    
     Args:
         rule: Rule object (must have sql_expression)
         pattern: Optional Pattern object
@@ -78,14 +82,17 @@ async def assess_rule_risk(
     Returns:
         APIRuleRisk object or None if assessment unavailable
     """
+    from app.v2_rule_safety_classifier import RuleSafetyClassifier, RuleSafetyCategory
+    
     sql_expression = rule.sql_expression
     
-    # Start with pattern-based detection
+    # Start with pattern-based detection (for warnings)
     warnings = detect_aggressive_patterns(sql_expression)
     false_positive_scenarios = warnings.copy()
     
     # Try LLM-based validation if available
     risk_level = "unknown"
+    llm_validation_result = None  # Initialize before use
     
     if llm_engine:
         try:
@@ -99,6 +106,30 @@ async def assess_rule_risk(
                 
                 pattern_description = pattern.description if pattern and hasattr(pattern, 'description') else ""
                 
+                # Additional deterministic checks before LLM validation
+                import re
+                sql_upper = sql_expression.upper()
+                
+                # Check for short patterns (<3 chars) in LIKE clauses
+                like_patterns = re.findall(r"LIKE\s+'%([^%]+)%'", sql_expression, re.IGNORECASE)
+                short_patterns = [p for p in like_patterns if len(p) < 3]
+                stop_words = {'if', 'for', 'on', 'in', 'at', 'to', 'of', 'the', 'a', 'an', 
+                             'ur', 'sd', 'ub', 'en', 'ру', 'ен', 'pm', 'al'}
+                has_stop_words = any(p.lower() in stop_words for p in like_patterns)
+                
+                # Check for broad rules (>5 OR without AND)
+                or_count = sql_upper.count(" OR ")
+                has_and = " AND " in sql_upper
+                is_broad_rule = or_count > 5 and not has_and
+                
+                # Add warnings for deterministic checks
+                if short_patterns:
+                    warnings.append(f"Contains very short patterns (<3 chars): {short_patterns} - high false positive risk")
+                if has_stop_words:
+                    warnings.append("Contains stop words in patterns - high false positive risk")
+                if is_broad_rule:
+                    warnings.append(f"Broad rule with {or_count} OR conditions without AND - medium/high false positive risk")
+                
                 validation_result = await validator.validate_rule_quality(
                     sql_expression=sql_expression,
                     pattern_description=pattern_description,
@@ -106,7 +137,8 @@ async def assess_rule_risk(
                 )
                 
                 if validation_result:
-                    risk_level = validation_result.get("risk_level", "unknown")
+                    llm_validation_result = validation_result
+                    risk_level = llm_validation_result.get("risk_level", "unknown")
                     
                     # Merge LLM warnings
                     llm_warnings = validation_result.get("false_positive_risks", [])
@@ -114,6 +146,26 @@ async def assess_rule_risk(
                         if warning not in warnings:
                             warnings.append(warning)
                             false_positive_scenarios.append(warning)
+    
+    # Use new two-category classifier (already imported at top)
+    category, reason = RuleSafetyClassifier.classify_rule_safety(
+        rule=rule,
+        pattern=pattern,
+        llm_validation_result=llm_validation_result,
+    )
+    
+    # Map category to risk level for backward compatibility
+    if category == RuleSafetyCategory.AUTO_SAFE:
+        risk_level = "low"
+    elif category == RuleSafetyCategory.REQUIRES_REVIEW:
+        # If risk_level is still unknown, set based on warnings
+        if risk_level == "unknown":
+            if len(warnings) >= 2:
+                risk_level = "high"
+            elif len(warnings) >= 1:
+                risk_level = "medium"
+            else:
+                risk_level = "medium"  # Requires review by default
         except Exception as e:
             logger.warning(f"LLM risk assessment failed: {e}")
             # Fall through to pattern-based assessment

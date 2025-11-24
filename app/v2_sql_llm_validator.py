@@ -157,12 +157,17 @@ class OpenAIValidator(SQLRuleValidator):
             ham_examples = "\n".join([f"- {msg[:60]}..." if len(msg) > 60 else f"- {msg}" for msg in example_ham[:3]])
             ham_section = f"\nHAM (should NOT match):\n{ham_examples}"
         
-        # Compact prompt - focus on false positive risk
+        # Compact prompt - focus on false positive risk with additional checks
         prompt = f"""SQL rule quality check:
 
 SQL: {sql_expression}
 Pattern: {pattern_description[:100]}
 SPAM examples: {spam_examples}{ham_section}
+
+CRITICAL CHECKS:
+1. Short patterns (<3 chars): Check if SQL contains LIKE '%XX%' with very short patterns (e.g., 'if', 'pm', 'al', 'ur', 'sd', 'ub', 'en', 'ру', 'ен') - HIGH RISK
+2. Broad rules (>5 OR without AND): Check if SQL has >5 OR conditions without AND - MEDIUM/HIGH RISK
+3. Stop words: Check if SQL patterns contain stop words ('if', 'for', 'on', 'in', 'at', 'to', 'of', 'the', 'a', 'an', 'pm', 'al', 'ur', 'sd', 'ub', 'en', 'ру', 'ен') - HIGH RISK
 
 Check false positive risk (low/medium/high). JSON:
 {{"is_safe": bool, "risk_level": "low|medium|high", "false_positive_risks": ["scenario"], "suggestions": ["suggestion"], "reasoning": "brief"}}"""

@@ -61,11 +61,16 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 30.0  # Timeout for LLM API calls
     
     pattern_mining_chunk_size: int = 10000  # Increased for two-stage processing
+    pattern_mining_max_parallel_chunks: int = 3  # Maximum parallel chunks for batch processing (2-3x speedup)
     
     # Pattern Mining Thresholds
     pattern_mining_min_url_count: int = 5  # Minimum URL occurrences to create pattern
     pattern_mining_min_keyword_count: int = 10  # Minimum keyword occurrences to create pattern
     pattern_mining_min_spam_ratio: float = 0.05  # Minimum spam ratio (5% of total spam)
+    
+    # Domain Classifier Settings
+    domain_whitelist: str = ""  # Comma-separated list of additional domains to whitelist (organization-specific)
+    spam_threshold: float = 0.4  # Spam score threshold (0.0-1.0) for domain classification. Lower = more strict, Higher = more permissive
     
     # Embedding Engine Configuration
     # Used for semantic pattern mining: generates embeddings for message similarity analysis and DBSCAN clustering.

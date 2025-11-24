@@ -20,6 +20,7 @@ class PatternTier(Enum):
     SAFE_AUTO = "safe_auto"  # Can be auto-promoted to active/ban rules
     REVIEW_ONLY = "review_only"  # Needs manual review before promotion
     FEATURE_ONLY = "feature_only"  # Use as ML feature, not standalone rule
+    INSIGHT_ONLY = "insight_only"  # No rule generated, pattern tracking only (too vague/risky)
 
 
 def classify_pattern_tier(
@@ -78,6 +79,7 @@ def get_promotion_profile_patterns(
         PatternTier.SAFE_AUTO: [],
         PatternTier.REVIEW_ONLY: [],
         PatternTier.FEATURE_ONLY: [],
+        PatternTier.INSIGHT_ONLY: [],
     }
     
     for result in pattern_results:

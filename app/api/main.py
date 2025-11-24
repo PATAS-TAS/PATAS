@@ -18,6 +18,7 @@ from app.v2_promotion import PromotionService, AggressivenessProfile
 from app.v2_rule_backend import create_rule_backend
 from app.v2_llm_engine import create_mining_engine
 from app.v2_embedding_engine import create_embedding_engine
+from app.v2_report_generator import ReportGenerator
 from app.models import RuleStatus
 from app.api.pattern_stats import (
     compute_pattern_statistics,
@@ -789,6 +790,25 @@ async def analyze_batch(
             for rule in pattern_data["rules"]
         ]
     
+    # Calculate total time
+    total_time = time.time() - start_time
+    
+    # Generate comprehensive report
+    report_generator = ReportGenerator()
+    job_id = f"analyze_{int(start_time)}"
+    stats_dict = {
+        'started_at': datetime.fromtimestamp(start_time, tz=timezone.utc),
+        'completed_at': datetime.now(timezone.utc),
+        'total_messages': ingested_count,
+        'spam_count': sum(1 for msg in request.messages if msg.is_spam),
+    }
+    analysis_report = report_generator.generate_report(
+        job_id=job_id,
+        patterns=recent_patterns,
+        rules=all_relevant_rules,
+        stats=stats_dict,
+    )
+    
     # Build response
     return AnalyzeResponse(
         patterns=pattern_summaries,
@@ -816,6 +836,7 @@ async def analyze_batch(
                 "evaluation_seconds": round(evaluation_time, 3),
                 "total_seconds": round(total_time, 3),
             },
+            "report": analysis_report.to_dict(),
         },
     )
 

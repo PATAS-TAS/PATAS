@@ -358,6 +358,29 @@ CRITICAL SAFETY REQUIREMENTS:
 IMPORTANT: Focus on SEMANTIC PATTERNS (meaning), not exact words. Spammers use synonyms, 
 paraphrases, and variations. Your rules should catch ALL variations of the same spam intent.
 
+CRITICAL RULES FOR QUALITY:
+1. QUALITY OVER QUANTITY:
+   - Generate rules for ~60-70% of patterns
+   - For 30-40% of patterns, mark as INSIGHT_ONLY (too vague/risky)
+   - Only create rules that are SPECIFIC and ACTIONABLE
+
+2. PATTERN SPECIFICITY:
+   - GOOD: "Crypto investment offers promising 10% daily ROI on cloud mining"
+   - BAD: "Messages containing investment opportunities" (too broad)
+   - GOOD: "Phishing emails impersonating PayPal payment failures"
+   - BAD: "Payment-related messages" (catches legitimate support)
+
+3. TIERING (BE STRICT):
+   - SAFE_AUTO: High confidence (HIGH), Low risk (<10%). Very specific pattern.
+   - REVIEW_ONLY: Medium confidence/risk (10-30%). Good pattern but needs verification.
+   - DANGEROUS: High risk (30-75%). Insight only, SQL commented out.
+   - INSIGHT_ONLY: Too vague (>75% risk) or LOW confidence. DO NOT generate SQL rule.
+
+4. TRACEABILITY:
+   - In 'description', MUST include matched IDs
+   - Format: "Crypto investment scam pattern. Matches IDs: 12, 15, 23, 45, 67"
+   - Use 3-10 IDs from the provided example_ids (or placeholder if not available)
+
 Spam Statistics:
 - Total spam messages: {aggregated_signals.get('total_spam', 0)}
 - Total ham messages: {aggregated_signals.get('total_ham', 0)}

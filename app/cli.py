@@ -274,7 +274,7 @@ async def cmd_resume_mining(
             return
         
         # Check if this is a two-stage checkpoint
-        metadata = checkpoint.metadata or {}
+        metadata = checkpoint.checkpoint_metadata or {}
         is_two_stage = metadata.get("two_stage", False)
         
         # Create engines if needed
@@ -454,6 +454,82 @@ async def cmd_export_llm_data(
         logger.info(f"  Rule explanation: {files['rule_explanation']}")
 
 
+async def cmd_export_rules(
+    format: str = "sql",
+    output: Optional[str] = None,
+    status: Optional[str] = None,
+):
+    """
+    Export rules in various formats.
+    
+    Args:
+        format: Export format (sql, metadata, markdown, package)
+        output: Output file or directory (default: stdout or ./patas_export_<timestamp>)
+        status: Filter by rule status (candidate, shadow, active, deprecated)
+    """
+    from app.database import AsyncSessionLocal
+    from app.repositories import RuleRepository, PatternRepository
+    from app.v2_rule_backend import SqlRuleBackend
+    
+    async with AsyncSessionLocal() as db:
+        rule_repo = RuleRepository(db)
+        pattern_repo = PatternRepository(db)
+        
+        # Get all rules
+        all_rules = await rule_repo.list_all(limit=10000)
+        
+        # Filter by status if specified
+        if status:
+            all_rules = [r for r in all_rules if r.status.value == status.lower()]
+        
+        # Get associated patterns
+        pattern_ids = {r.pattern_id for r in all_rules if r.pattern_id}
+        patterns = []
+        for pattern_id in pattern_ids:
+            pattern = await pattern_repo.get_by_id(pattern_id)
+            if pattern:
+                patterns.append(pattern)
+        
+        backend = SqlRuleBackend()
+        
+        if format == "sql":
+            content = backend.export_sql_only(all_rules)
+            if output:
+                with open(output, 'w') as f:
+                    f.write(content)
+                logger.info(f"Exported {len(all_rules)} rules to {output}")
+            else:
+                print(content)
+        
+        elif format == "metadata":
+            content = backend.export_with_metadata(all_rules)
+            if output:
+                with open(output, 'w') as f:
+                    f.write(content)
+                logger.info(f"Exported {len(all_rules)} rules with metadata to {output}")
+            else:
+                print(content)
+        
+        elif format == "markdown":
+            content = backend.export_markdown_report(all_rules, patterns)
+            if output:
+                with open(output, 'w') as f:
+                    f.write(content)
+                logger.info(f"Exported markdown report to {output}")
+            else:
+                print(content)
+        
+        elif format == "package":
+            if not output:
+                from datetime import datetime
+                output = f"./patas_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            backend.export_deployment_package(all_rules, patterns, output)
+            logger.info(f"Deployment package created in {output}")
+        
+        else:
+            logger.error(f"Unknown format: {format}. Use: sql, metadata, markdown, package")
+
+
 def main():
     """CLI entry point."""
     if len(sys.argv) < 2:
@@ -467,6 +543,7 @@ def main():
         logger.info("  promote-rules  - Promotion/rollback of rules based on metrics")
         logger.info("  eval-pipeline  - Run evaluation harness for comparing LLM/embedding configs")
         logger.info("  export-llm-data - Export training datasets for future PATAS-LLM")
+        logger.info("  export-rules   - Export rules in various formats (sql, metadata, markdown, package)")
         logger.info("  safety-eval    - Run safety evaluation on rules")
         logger.info("  demo-tg        - Run demo for tg safety/infra teams")
         logger.info("  explain-rule   - Explain a single rule in detail")
@@ -534,6 +611,12 @@ def main():
         from scripts.run_safety_evaluation import run_safety_evaluation
         exit_code = asyncio.run(run_safety_evaluation())
         sys.exit(exit_code)
+    
+    elif command == "export-rules":
+        format_type = sys.argv[2] if len(sys.argv) > 2 else "sql"
+        output = sys.argv[3] if len(sys.argv) > 3 else None
+        status = sys.argv[4] if len(sys.argv) > 4 else None
+        asyncio.run(cmd_export_rules(format=format_type, output=output, status=status))
     
     elif command in ("demo-messenger", "demo"):
         import argparse
