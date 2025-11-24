@@ -149,12 +149,14 @@ class PatternMiningPipeline:
                     after_id=since_message_id,  # Filter by message ID if incremental
                 )
             
-            # Get sample of ham messages for context and quality filtering
+            # Get sample of ham messages for context and quality filtering (lazy loading: fixed sample size)
+            ham_sample_size = 1000  # Fixed sample size instead of proportional for better performance
             ham_messages = await self.message_repo.get_recent(
                 days=days,
-                limit=min(1000, len(spam_messages) // 10) if spam_messages else 100,  # 10% sample
+                limit=ham_sample_size,
                 is_spam=False,
             )
+            logger.debug(f"Loaded {len(ham_messages)} ham messages (sample) for quality filter")
             
             if len(spam_messages) < min_spam_count:
                 logger.warning(f"Only {len(spam_messages)} spam messages found (min={min_spam_count})")
@@ -324,10 +326,17 @@ class PatternMiningPipeline:
                             evaluation_count += 1
                             
                             # Check if rule qualifies for AUTO_SAFE based on evaluation
-                            # Смягченные критерии: precision >= 0.90 и hits >= 10 (вместо precision >= 0.95 и recall >= 0.5)
-                            if evaluation.precision and evaluation.precision >= 0.90:
+                            # КРИТИЧЕСКИ СТРОГИЕ критерии: precision >= 0.95 И false positive rate <= 1%
+                            if evaluation.precision and evaluation.precision >= 0.95:  # СТРОГИЙ порог
                                 min_hits = 10
                                 if evaluation.hits_total and evaluation.hits_total >= min_hits:
+                                    # КРИТИЧЕСКАЯ ПРОВЕРКА: Максимум 1% false positives
+                                    false_positive_rate = 0.0
+                                    if evaluation.hits_ham is not None and evaluation.hits_total is not None:
+                                        false_positive_rate = evaluation.hits_ham / evaluation.hits_total
+                                    
+                                    # Только если false positive rate <= 1%
+                                    if false_positive_rate <= 0.01:
                                     # High precision and recall: classify as AUTO_SAFE
                                     category, reason = RuleSafetyClassifier.classify_rule_safety(
                                         rule=rule,

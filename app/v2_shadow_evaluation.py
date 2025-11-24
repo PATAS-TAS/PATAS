@@ -5,7 +5,7 @@ Evaluates rules in SHADOW status against recent messages
 and computes precision, recall, coverage metrics.
 """
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -23,6 +23,52 @@ from app.metrics import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def auto_fix_sql_errors(sql_expression: str) -> Tuple[str, bool]:
+    """
+    Автоматически исправляет простые SQL ошибки.
+    
+    Args:
+        sql_expression: Исходный SQL
+        
+    Returns:
+        (исправленный_sql, были_ли_исправления)
+    """
+    fixed_sql = sql_expression.strip()
+    was_fixed = False
+    
+    # Исправление 1: Отсутствие "FROM messages"
+    sql_upper = fixed_sql.upper()
+    if "SELECT" in sql_upper and "FROM" not in sql_upper:
+        # Простое исправление: добавить FROM messages после SELECT
+        # Это очень базовое исправление, работает только для простых случаев
+        if "WHERE" in sql_upper:
+            # Если есть WHERE, вставить FROM перед WHERE
+            where_pos = sql_upper.find("WHERE")
+            fixed_sql = fixed_sql[:where_pos] + "FROM messages " + fixed_sql[where_pos:]
+            was_fixed = True
+            logger.debug(f"Auto-fixed SQL: added FROM messages before WHERE")
+        else:
+            # Если нет WHERE, добавить в конец
+            fixed_sql = fixed_sql.rstrip() + " FROM messages"
+            was_fixed = True
+            logger.debug(f"Auto-fixed SQL: added FROM messages at the end")
+    
+    # Исправление 2: Неправильное имя таблицы (простые случаи)
+    # Заменяем другие имена таблиц на "messages"
+    import re
+    # Ищем FROM <table> где table != messages
+    from_pattern = r"FROM\s+(\w+)\s+"
+    matches = re.finditer(from_pattern, fixed_sql, re.IGNORECASE)
+    for match in matches:
+        table_name = match.group(1)
+        if table_name.lower() != "messages":
+            fixed_sql = fixed_sql[:match.start(1)] + "messages" + fixed_sql[match.end(1):]
+            was_fixed = True
+            logger.debug(f"Auto-fixed SQL: replaced table name '{table_name}' with 'messages'")
+    
+    return fixed_sql, was_fixed
 
 
 class ShadowEvaluationService:
@@ -78,10 +124,18 @@ class ShadowEvaluationService:
         sql_expression = rule.sql_expression
         
         try:
+            # Попытка автоматического исправления простых ошибок
+            fixed_sql, was_fixed = auto_fix_sql_errors(sql_expression)
+            if was_fixed:
+                logger.info(f"Rule {rule_id}: auto-fixed SQL errors, attempting evaluation with fixed SQL")
+                sql_expression = fixed_sql
+            
             # Validate SQL is safe
             is_valid, error = validate_sql_rule(sql_expression)
             if not is_valid:
                 logger.error(f"Rule {rule_id} SQL validation failed: {error}")
+                # Логируем проблемное правило для последующего исправления
+                logger.warning(f"Rule {rule_id} SQL (for manual review): {sql_expression[:200]}")
                 return None
             
             # Sanitize SQL for evaluation (ensures correct table name)

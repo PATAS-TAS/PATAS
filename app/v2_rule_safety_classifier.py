@@ -30,8 +30,18 @@ class RuleSafetyClassifier:
     """
     
     # Строгие критерии для AUTO_SAFE
-    STOP_WORDS = {'if', 'for', 'on', 'in', 'at', 'to', 'of', 'the', 'a', 'an', 
-                  'ur', 'sd', 'ub', 'en', 'ру', 'ен', 'pm', 'al'}
+    # Расширенный список stop words для защиты от false positives
+    # Эти слова слишком общие и могут встречаться в легитимных сообщениях
+    STOP_WORDS = {
+        # Английские общие слова
+        'if', 'for', 'on', 'in', 'at', 'to', 'of', 'the', 'a', 'an',
+        'ur', 'sd', 'ub', 'en', 'pm', 'al',
+        # Русские общие слова (короткие фрагменты)
+        'ру', 'ен', 'то', 'ка', 'как', 'что', 'это', 'для', 'при',
+        # Дополнительные общие слова, которые могут быть в легитимных сообщениях
+        'work', 'job', 'home', 'day', 'time', 'now', 'here', 'there',
+        'работа', 'дом', 'день', 'время', 'сейчас', 'здесь', 'там',
+    }
     
     # Whitelist для безопасных паттернов (известные спам-домены и ключевые слова)
     # Эти паттерны можно автоматически применять, если прошли детерминистические проверки
@@ -117,8 +127,8 @@ class RuleSafetyClassifier:
             return RuleSafetyCategory.REQUIRES_REVIEW, deterministic_check[1]
         
         # ШАГ 2: Проверка shadow evaluation (если доступна)
-        # Если правило имеет высокую точность в shadow evaluation - можно автоматически применять
-        # Используем переданные evaluations или безопасный доступ к rule.evaluations
+        # КРИТИЧЕСКИ ВАЖНО: Evaluation имеет ПРИОРИТЕТ над whitelist
+        # Если есть evaluation с FPR > 1%, даже whitelist паттерны требуют проверки
         rule_evaluations = evaluations
         if rule_evaluations is None:
             try:
@@ -126,13 +136,35 @@ class RuleSafetyClassifier:
             except Exception:
                 rule_evaluations = None
         
+        # Флаг: есть ли evaluation с проблемным FPR
+        has_problematic_evaluation = False
+        
         if rule_evaluations:
             # Найти последнее evaluation с высокой точностью
+            # КРИТИЧЕСКИ ВАЖНО: Очень строгие критерии для AUTO_SAFE (защита от false positives)
+            # Требуем precision >= 0.95 (очень высокая точность) и hits >= 10
+            # Также проверяем, что false positives минимальны
             for evaluation in rule_evaluations:
-                if evaluation.precision and evaluation.precision > 0.95 and evaluation.recall and evaluation.recall > 0.5:
-                    # Высокая точность и достаточный recall - можно автоматически применять
-                    if deterministic_check[0]:  # Если прошло детерминистические проверки
-                        return RuleSafetyCategory.AUTO_SAFE, f"High precision in shadow evaluation (precision={evaluation.precision:.2f}, recall={evaluation.recall:.2f})"
+                if evaluation.precision and evaluation.precision >= 0.95:  # СТРОГИЙ порог: 0.95 вместо 0.90
+                    min_hits = 10
+                    if evaluation.hits_total and evaluation.hits_total >= min_hits:
+                        # КРИТИЧЕСКАЯ ПРОВЕРКА: Максимум 1% false positives (ham_hits / total_hits <= 0.01)
+                        # Это означает precision >= 0.99 для AUTO_SAFE через evaluation
+                        if evaluation.hits_total > 0:
+                            false_positive_rate = 0.0
+                            if evaluation.hits_ham is not None and evaluation.hits_total is not None:
+                                false_positive_rate = evaluation.hits_ham / evaluation.hits_total
+                            
+                            # Только если false positive rate <= 1% (precision >= 99%)
+                            if false_positive_rate <= 0.01:
+                                # Высокая точность и минимальные false positives - можно автоматически применять
+                                if deterministic_check[0]:  # Если прошло детерминистические проверки
+                                    recall_info = f", recall={evaluation.recall:.2f}" if evaluation.recall else ""
+                                    return RuleSafetyCategory.AUTO_SAFE, f"Very high precision in shadow evaluation (precision={evaluation.precision:.2f}{recall_info}, hits={evaluation.hits_total}, FPR={false_positive_rate:.4f})"
+                            else:
+                                # False positive rate слишком высокий - требует проверки
+                                has_problematic_evaluation = True
+                                logger.debug(f"Rule {rule.id} evaluation has FPR {false_positive_rate:.4f} > 0.01, requiring review")
         
         # ШАГ 3: LLM валидация (если доступна)
         if llm_validation_result:
@@ -152,13 +184,29 @@ class RuleSafetyClassifier:
                 return RuleSafetyCategory.REQUIRES_REVIEW, "LLM validation: unknown risk - requires review"
         
         # ШАГ 4: Если LLM недоступен, но прошло детерминистические проверки
-        # Если все паттерны из whitelist - можно автоматически применять
+        # КРИТИЧЕСКИ ВАЖНО: Даже если все паттерны в whitelist, требуем дополнительную проверку
+        # для максимальной защиты от false positives
+        # НО: Если есть evaluation с FPR > 1%, даже whitelist требует проверки
+        if has_problematic_evaluation:
+            return RuleSafetyCategory.REQUIRES_REVIEW, "Evaluation shows FPR > 1% - requires review for safety (even with whitelist patterns)"
+        
         like_patterns = re.findall(r"LIKE\s+'%([^%]+)%'", sql_expression, re.IGNORECASE)
         if like_patterns and all(RuleSafetyClassifier._is_whitelisted_pattern(p) for p in like_patterns):
-            return RuleSafetyCategory.AUTO_SAFE, "All patterns in safe whitelist, passed deterministic checks"
+            # Дополнительная проверка: правило должно иметь AND условия или быть очень специфичным
+            sql_upper = sql_expression.upper()
+            has_and = " AND " in sql_upper
+            like_count = sql_upper.count("LIKE")
+            
+            # Только если правило имеет AND условия ИЛИ очень специфичное (один паттерн из whitelist)
+            # Это дополнительная защита от слишком широких правил
+            if has_and or (like_count == 1 and len(like_patterns) == 1):
+                return RuleSafetyCategory.AUTO_SAFE, "All patterns in safe whitelist, passed deterministic checks, has AND conditions or is specific"
+            else:
+                # Даже с whitelist паттернами, если правило широкое - требует проверки
+                return RuleSafetyCategory.REQUIRES_REVIEW, "All patterns in whitelist but rule may be too broad - requires review for safety"
         
-        # Для консервативности - требует проверки, если нет LLM валидации
-        return RuleSafetyCategory.REQUIRES_REVIEW, "Passed deterministic checks but LLM validation unavailable - requires review for safety"
+        # Для максимальной консервативности - требует проверки, если нет LLM валидации
+        return RuleSafetyCategory.REQUIRES_REVIEW, "Passed deterministic checks but LLM validation unavailable - requires review for safety (conservative approach)"
     
     @staticmethod
     def _check_deterministic_safety(
