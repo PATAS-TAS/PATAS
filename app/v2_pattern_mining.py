@@ -195,7 +195,7 @@ class PatternMiningPipeline:
                 # Create tasks for parallel processing
                 chunk_tasks = []
                 for i in batch_chunks:
-                    chunk = spam_messages[i:i + self.chunk_size]
+                chunk = spam_messages[i:i + self.chunk_size]
                     # Only pass ham_messages to first chunk
                     task = self._extract_and_aggregate(chunk, ham_messages if i == 0 else [])
                     chunk_tasks.append((i, task))
@@ -205,46 +205,46 @@ class PatternMiningPipeline:
                 
                 # Merge results from parallel batch
                 for (chunk_idx, _), chunk_signals in zip(chunk_tasks, chunk_results):
-                    # Merge signals from chunks BEFORE updating checkpoint
-                    if aggregated_signals is None:
-                        aggregated_signals = chunk_signals
-                    else:
-                        # Merge counters and lists
-                        for key in ["url_patterns", "phone_patterns", "keyword_patterns", "commercial_rule_matches"]:
-                            if key in chunk_signals:
-                                for k, v in chunk_signals[key].items():
-                                    aggregated_signals[key][k] = aggregated_signals[key].get(k, 0) + v
-                        
-                        # Merge signature clusters (limit total)
-                        if "signature_clusters" in chunk_signals:
-                            for sig, examples in list(chunk_signals["signature_clusters"].items())[:20]:
-                                if sig not in aggregated_signals["signature_clusters"]:
-                                    aggregated_signals["signature_clusters"][sig] = examples
-                                elif len(aggregated_signals["signature_clusters"][sig]) < 5:
-                                    aggregated_signals["signature_clusters"][sig].extend(examples[:5 - len(aggregated_signals["signature_clusters"][sig])])
+                # Merge signals from chunks BEFORE updating checkpoint
+                if aggregated_signals is None:
+                    aggregated_signals = chunk_signals
+                else:
+                    # Merge counters and lists
+                    for key in ["url_patterns", "phone_patterns", "keyword_patterns", "commercial_rule_matches"]:
+                        if key in chunk_signals:
+                            for k, v in chunk_signals[key].items():
+                                aggregated_signals[key][k] = aggregated_signals[key].get(k, 0) + v
                     
-                    # Update checkpoint periodically (every batch_size chunks) to reduce DB load
-                    # Save AFTER merge so checkpoint contains complete aggregated signals
+                    # Merge signature clusters (limit total)
+                    if "signature_clusters" in chunk_signals:
+                        for sig, examples in list(chunk_signals["signature_clusters"].items())[:20]:
+                            if sig not in aggregated_signals["signature_clusters"]:
+                                aggregated_signals["signature_clusters"][sig] = examples
+                            elif len(aggregated_signals["signature_clusters"][sig]) < 5:
+                                aggregated_signals["signature_clusters"][sig].extend(examples[:5 - len(aggregated_signals["signature_clusters"][sig])])
+                
+                # Update checkpoint periodically (every batch_size chunks) to reduce DB load
+                # Save AFTER merge so checkpoint contains complete aggregated signals
                     chunk_num = chunk_idx // self.chunk_size
                     if chunk_num > 0 and chunk_num % batch_size == 0:
                         chunk = spam_messages[chunk_idx:chunk_idx + self.chunk_size]
                         if chunk:
-                            last_processed_id = chunk[-1].id
-                            try:
-                                await self.checkpoint_repo.update(
-                                    checkpoint_id,
-                                    last_processed_message_id=last_processed_id,
-                                    patterns_in_progress=aggregated_signals if aggregated_signals else {},
-                                    metadata={
+                    last_processed_id = chunk[-1].id
+                    try:
+                        await self.checkpoint_repo.update(
+                            checkpoint_id,
+                            last_processed_message_id=last_processed_id,
+                            patterns_in_progress=aggregated_signals if aggregated_signals else {},
+                            metadata={
                                         "chunk_index": chunk_num,
                                         "total_chunks": total_chunks,
                                         "processed_messages": min(chunk_idx + self.chunk_size, len(spam_messages)),
-                                        "total_messages": len(spam_messages),
-                                    },
-                                )
-                            except Exception as e:
-                                # Log but don't fail on checkpoint update errors
-                                logger.warning(f"Failed to update checkpoint: {e}")
+                                "total_messages": len(spam_messages),
+                            },
+                        )
+                    except Exception as e:
+                        # Log but don't fail on checkpoint update errors
+                        logger.warning(f"Failed to update checkpoint: {e}")
         
             if aggregated_signals is None:
                 aggregated_signals = {
@@ -334,30 +334,44 @@ class PatternMiningPipeline:
                                     false_positive_rate = 0.0
                                     if evaluation.hits_ham is not None and evaluation.hits_total is not None:
                                         false_positive_rate = evaluation.hits_ham / evaluation.hits_total
-                                    
-                                    # Только если false positive rate <= 1%
-                                    if false_positive_rate <= 0.01:
-                                    # High precision and recall: classify as AUTO_SAFE
-                                    category, reason = RuleSafetyClassifier.classify_rule_safety(
-                                        rule=rule,
-                                        pattern=None,
-                                        llm_validation_result=None,
-                                        evaluations=[evaluation],
-                                    )
-                                    if category == RuleSafetyCategory.AUTO_SAFE:
-                                        auto_safe_from_eval += 1
-                                        recall_info = f", recall={evaluation.recall:.2f}" if evaluation.recall else ""
-                                        logger.info(
-                                            f"Rule {rule.id} auto-classified as AUTO_SAFE based on evaluation: "
-                                            f"precision={evaluation.precision:.2f}{recall_info}, hits={evaluation.hits_total}"
+                                        
+                                        # Только если false positive rate <= 1%
+                                        if false_positive_rate <= 0.01:
+                                            # High precision and recall: classify as AUTO_SAFE
+                                            category, reason = RuleSafetyClassifier.classify_rule_safety(
+                                                rule=rule,
+                                                pattern=None,
+                                                llm_validation_result=None,
+                                                evaluations=[evaluation],
+                                            )
+                                            if category == RuleSafetyCategory.AUTO_SAFE:
+                                                auto_safe_from_eval += 1
+                                                recall_info = f", recall={evaluation.recall:.2f}" if evaluation.recall else ""
+                                                logger.info(
+                                                    f"Rule {rule.id} auto-classified as AUTO_SAFE based on evaluation: "
+                                                    f"precision={evaluation.precision:.2f}{recall_info}, hits={evaluation.hits_total}"
+                                                )
+                                            elif category == RuleSafetyCategory.DANGEROUS:
+                                                logger.warning(
+                                                    f"Rule {rule.id} classified as DANGEROUS after evaluation: {reason}. "
+                                                    f"SQL should be commented out."
+                                                )
+                                                # Note: SQL commenting should be done during rule creation
+                                                # For existing rules, this would require updating the rule in DB
+                                    elif category == RuleSafetyCategory.DANGEROUS:
+                                        logger.warning(
+                                            f"Rule {rule.id} classified as DANGEROUS after evaluation: {reason}. "
+                                            f"SQL should be commented out."
                                         )
+                                        # Note: SQL commenting should be done during rule creation
+                                        # For existing rules, this would require updating the rule in DB
                     except Exception as e:
                         logger.warning(f"Failed to evaluate rule {rule.id}: {e}")
                 
                 logger.info(
                     f"Automatic evaluation complete: {evaluation_count} rules evaluated, "
                     f"{auto_safe_from_eval} auto-classified as AUTO_SAFE"
-                )
+            )
             
             # Mark checkpoint as completed
             await self.checkpoint_repo.update(
@@ -486,7 +500,7 @@ class PatternMiningPipeline:
                     # Create tasks for parallel processing
                     chunk_tasks = []
                     for i in batch_chunks:
-                        chunk = spam_messages[i:i + self.chunk_size]
+                    chunk = spam_messages[i:i + self.chunk_size]
                         task = self._extract_and_aggregate(chunk, ham_messages if i == 0 else [])
                         chunk_tasks.append(task)
                     
@@ -495,16 +509,16 @@ class PatternMiningPipeline:
                     
                     # Merge results from parallel batch
                     for chunk_signals in chunk_results:
-                        # Merge with existing aggregated signals
-                        for key in ["url_patterns", "phone_patterns", "keyword_patterns", "commercial_rule_matches"]:
-                            if key in chunk_signals:
-                                for k, v in chunk_signals[key].items():
-                                    aggregated_signals[key][k] = aggregated_signals[key].get(k, 0) + v
-                        
-                        if "signature_clusters" in chunk_signals:
-                            for sig, examples in list(chunk_signals["signature_clusters"].items())[:20]:
-                                if sig not in aggregated_signals["signature_clusters"]:
-                                    aggregated_signals["signature_clusters"][sig] = examples
+                    # Merge with existing aggregated signals
+                    for key in ["url_patterns", "phone_patterns", "keyword_patterns", "commercial_rule_matches"]:
+                        if key in chunk_signals:
+                            for k, v in chunk_signals[key].items():
+                                aggregated_signals[key][k] = aggregated_signals[key].get(k, 0) + v
+                    
+                    if "signature_clusters" in chunk_signals:
+                        for sig, examples in list(chunk_signals["signature_clusters"].items())[:20]:
+                            if sig not in aggregated_signals["signature_clusters"]:
+                                aggregated_signals["signature_clusters"][sig] = examples
             
             # Generate patterns and rules from aggregated signals
             patterns_created, rules_created = await self._generate_patterns_and_rules(
@@ -795,10 +809,10 @@ class PatternMiningPipeline:
                 patterns_created += 1
                 # Check if pattern should be INSIGHT_ONLY before creating rule
                 if not SafetyHeuristics.should_downgrade_to_insight_only(pattern=pattern):
-                    # Create candidate rule
-                    rule = await self._create_url_rule(pattern, url_pattern)
-                    if rule:
-                        rules_created += 1
+                # Create candidate rule
+                rule = await self._create_url_rule(pattern, url_pattern)
+                if rule:
+                    rules_created += 1
                 else:
                     logger.info(f"Skipping rule generation for INSIGHT_ONLY pattern: {pattern.id} ({pattern.description[:50]})")
                 
@@ -893,7 +907,7 @@ class PatternMiningPipeline:
             if p.type == PatternType.URL and url_pattern in (p.description or ""):
                 return None  # Duplicate
         
-            pattern = await self.pattern_repo.create(
+        pattern = await self.pattern_repo.create(
             type=PatternType.URL,
             description=f"URL pattern: {url_pattern} (found in {count} spam messages)",
             examples=[url_pattern],
@@ -964,6 +978,20 @@ class PatternMiningPipeline:
             f"WHERE LOWER(text) LIKE '%{safe_url.lower()}%'"
         )
         
+        # Check if rule is DANGEROUS and comment out SQL if needed
+        from app.v2_rule_safety_classifier import RuleSafetyClassifier, RuleSafetyCategory
+        from app.models import Rule as RuleModel
+        
+        temp_rule = RuleModel(id=0, sql_expression=sql_expression)
+        category, reason = RuleSafetyClassifier.classify_rule_safety(
+            rule=temp_rule,
+            pattern=pattern,
+        )
+        
+        if category == RuleSafetyCategory.DANGEROUS:
+            logger.warning(f"URL rule classified as DANGEROUS: {reason}. SQL will be commented out.")
+            sql_expression = f"-- DANGEROUS: {reason}\n-- {sql_expression}"
+        
         rule = await self.lifecycle.create_candidate_rule(
             sql_expression=sql_expression,
             pattern_id=pattern.id,
@@ -995,6 +1023,20 @@ class PatternMiningPipeline:
             regex_pattern, _ = pattern_data
             # Convert regex to SQL-compatible expression
             sql_expression = self._regex_to_sql(regex_pattern, pattern_name)
+        
+        # Check if rule is DANGEROUS and comment out SQL if needed
+        from app.v2_rule_safety_classifier import RuleSafetyClassifier, RuleSafetyCategory
+        from app.models import Rule as RuleModel
+        
+        temp_rule = RuleModel(id=0, sql_expression=sql_expression)
+        category, reason = RuleSafetyClassifier.classify_rule_safety(
+            rule=temp_rule,
+            pattern=pattern,
+        )
+        
+        if category == RuleSafetyCategory.DANGEROUS:
+            logger.warning(f"Keyword rule classified as DANGEROUS: {reason}. SQL will be commented out.")
+            sql_expression = f"-- DANGEROUS: {reason}\n-- {sql_expression}"
         
         rule = await self.lifecycle.create_candidate_rule(
             sql_expression=sql_expression,
@@ -1279,20 +1321,20 @@ class PatternMiningPipeline:
                 ):
                     logger.info(f"Skipping rule generation for INSIGHT_ONLY pattern: {pattern.id} ({description[:50]})")
                 else:
-                    # Create candidate rule if SQL expression provided
-                    sql_expr = pattern_data.get("sql_expression")
-                    if sql_expr:
-                        rule_created = await self._process_llm_rule(
-                            sql_expr=sql_expr,
-                            description=description,
-                            pattern_id=pattern.id,
-                            examples=examples,
-                            spam_messages=spam_messages,
-                            use_llm=use_llm,
-                            enable_llm_validation=enable_llm_validation,
-                        )
-                        if rule_created:
-                            rules_created += 1
+                # Create candidate rule if SQL expression provided
+                sql_expr = pattern_data.get("sql_expression")
+                if sql_expr:
+                    rule_created = await self._process_llm_rule(
+                        sql_expr=sql_expr,
+                        description=description,
+                        pattern_id=pattern.id,
+                        examples=examples,
+                        spam_messages=spam_messages,
+                        use_llm=use_llm,
+                        enable_llm_validation=enable_llm_validation,
+                    )
+                    if rule_created:
+                        rules_created += 1
                 
                 # Intermediate commit every 5 LLM patterns to preserve progress (reduced frequency)
                 if patterns_created > 0 and patterns_created % 5 == 0:
@@ -1414,13 +1456,13 @@ class PatternMiningPipeline:
                 # Run LLM validation first
                 validation_result = None
                 if llm_validation_passed:
-                    validation_result = await validator.validate_rule_quality(
-                        sql_expression=sql_expr,
-                        pattern_description=description,
-                        example_spam_messages=example_spam,
-                    )
+                validation_result = await validator.validate_rule_quality(
+                    sql_expression=sql_expr,
+                    pattern_description=description,
+                    example_spam_messages=example_spam,
+                )
                 
-                # Classify rule safety (2 categories: AUTO_SAFE or REQUIRES_REVIEW)
+                # Classify rule safety (3 categories: AUTO_SAFE, REQUIRES_REVIEW, or DANGEROUS)
                 category, reason = RuleSafetyClassifier.classify_rule_safety(
                     rule=temp_rule,
                     pattern=None,  # Pattern not available here
@@ -1431,6 +1473,14 @@ class PatternMiningPipeline:
                     # Auto-safe: can be applied automatically
                     logger.info(f"Rule classified as AUTO_SAFE: {reason}")
                     # Continue to create rule
+                elif category == RuleSafetyCategory.DANGEROUS:
+                    # Dangerous: too broad pattern, comment out SQL to prevent accidental use
+                    logger.warning(
+                        f"Rule classified as DANGEROUS (Insight Only): {reason}. "
+                        f"SQL will be commented out."
+                    )
+                    # Comment out SQL expression to prevent accidental execution
+                    sql_expr = f"-- DANGEROUS: {reason}\n-- {sql_expr}"
                 elif category == RuleSafetyCategory.REQUIRES_REVIEW:
                     # Requires review: reject for now, will need LLM or manual review
                     logger.warning(

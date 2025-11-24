@@ -69,9 +69,10 @@ async def assess_rule_risk(
     """
     Assess risk of false positives for a rule.
     
-    Uses new two-category system:
-    - AUTO_SAFE: Can be applied automatically
-    - REQUIRES_REVIEW: Requires LLM or manual review
+    Uses three-category system:
+    - AUTO_SAFE: Ready for Automation - high confidence, low risk (<10%)
+    - REQUIRES_REVIEW: Requires Human Verification - good pattern, but may catch edge cases
+    - DANGEROUS: Insight Only (High Risk) - pattern too broad, SQL commented out
     
     Args:
         rule: Rule object (must have sql_expression)
@@ -146,8 +147,11 @@ async def assess_rule_risk(
                         if warning not in warnings:
                             warnings.append(warning)
                             false_positive_scenarios.append(warning)
+        except Exception as e:
+            logger.warning(f"LLM risk assessment failed: {e}")
+            # Fall through to pattern-based assessment
     
-    # Use new two-category classifier (already imported at top)
+    # Use three-category classifier (already imported at top)
     category, reason = RuleSafetyClassifier.classify_rule_safety(
         rule=rule,
         pattern=pattern,
@@ -157,6 +161,11 @@ async def assess_rule_risk(
     # Map category to risk level for backward compatibility
     if category == RuleSafetyCategory.AUTO_SAFE:
         risk_level = "low"
+    elif category == RuleSafetyCategory.DANGEROUS:
+        risk_level = "high"  # Dangerous patterns are high risk
+        # Add specific warning for dangerous patterns
+        if "Pattern too broad" not in str(warnings):
+            warnings.insert(0, f"DANGEROUS: {reason}")
     elif category == RuleSafetyCategory.REQUIRES_REVIEW:
         # If risk_level is still unknown, set based on warnings
         if risk_level == "unknown":
@@ -166,9 +175,6 @@ async def assess_rule_risk(
                 risk_level = "medium"
             else:
                 risk_level = "medium"  # Requires review by default
-        except Exception as e:
-            logger.warning(f"LLM risk assessment failed: {e}")
-            # Fall through to pattern-based assessment
     
     # If no LLM assessment, use pattern-based risk level
     if risk_level == "unknown" and warnings:

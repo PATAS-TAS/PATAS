@@ -1,9 +1,10 @@
 """
-Rule Safety Classifier - упрощенная двухкатегорийная система.
+Rule Safety Classifier - трехкатегорийная система безопасности правил.
 
 Категории:
-1. AUTO_SAFE - можно автоматически применять, абсолютно безопасно
-2. REQUIRES_REVIEW - требуют дополнительных проверок (LLM, или если LLM не уверен - вручную)
+1. AUTO_SAFE - Ready for Automation: высокая уверенность, низкий риск (<10%). Специфичные правила без false positives.
+2. REQUIRES_REVIEW - Requires Human Verification: хороший паттерн, но может поймать edge cases. Рекомендуется для карантина или ручной проверки.
+3. DANGEROUS - Insight Only (High Risk): паттерн слишком широкий (например, "Hello"). SQL закомментирован для предотвращения случайного применения. Полезен для понимания трендов атак.
 """
 import logging
 import re
@@ -17,16 +18,18 @@ logger = logging.getLogger(__name__)
 
 
 class RuleSafetyCategory(Enum):
-    """Упрощенная категоризация правил на 2 категории."""
-    AUTO_SAFE = "auto_safe"  # Можно автоматически применять, абсолютно безопасно
-    REQUIRES_REVIEW = "requires_review"  # Требуют проверки (LLM или ручной)
+    """Трехкатегорийная система безопасности правил."""
+    AUTO_SAFE = "auto_safe"  # Ready for Automation: высокая уверенность, низкий риск
+    REQUIRES_REVIEW = "requires_review"  # Requires Human Verification: требует проверки
+    DANGEROUS = "dangerous"  # Insight Only: слишком широкий паттерн, SQL закомментирован
 
 
 class RuleSafetyClassifier:
     """
-    Классифицирует правила на 2 категории:
-    1. AUTO_SAFE - абсолютно безопасные для автоматического применения
-    2. REQUIRES_REVIEW - требуют проверки (LLM валидация, или ручная проверка)
+    Классифицирует правила на 3 категории:
+    1. AUTO_SAFE - Ready for Automation: высокая уверенность, низкий риск (<10%)
+    2. REQUIRES_REVIEW - Requires Human Verification: хороший паттерн, но требует проверки
+    3. DANGEROUS - Insight Only: слишком широкий паттерн, SQL закомментирован
     """
     
     # Строгие критерии для AUTO_SAFE
@@ -105,17 +108,25 @@ class RuleSafetyClassifier:
         evaluations: Optional[List] = None,  # Pass evaluations explicitly to avoid lazy loading
     ) -> Tuple[RuleSafetyCategory, str]:
         """
-        Классифицирует правило на 2 категории.
+        Классифицирует правило на 3 категории.
         
         Args:
             rule: Rule объект с sql_expression
             pattern: Optional Pattern объект
             llm_validation_result: Optional результат LLM валидации
+            evaluations: Optional список RuleEvaluation объектов
         
         Returns:
             (category, reason) - категория и причина
         """
         sql_expression = rule.sql_expression
+        
+        # ШАГ 0: Проверка на DANGEROUS (слишком широкие/опасные паттерны)
+        dangerous_check = RuleSafetyClassifier._check_dangerous_pattern(
+            sql_expression, pattern
+        )
+        if dangerous_check[0]:
+            return RuleSafetyCategory.DANGEROUS, dangerous_check[1]
         
         # ШАГ 1: Детерминистические проверки (быстрые, без LLM)
         deterministic_check = RuleSafetyClassifier._check_deterministic_safety(
@@ -209,6 +220,54 @@ class RuleSafetyClassifier:
         return RuleSafetyCategory.REQUIRES_REVIEW, "Passed deterministic checks but LLM validation unavailable - requires review for safety (conservative approach)"
     
     @staticmethod
+    def _check_dangerous_pattern(
+        sql_expression: str,
+        pattern: Optional[Pattern] = None,
+    ) -> Tuple[bool, str]:
+        """
+        Проверяет, является ли правило слишком опасным (DANGEROUS - Insight Only).
+        
+        DANGEROUS правила:
+        - Содержат stop words (слишком общие слова: "Hello", "work", "time")
+        - Очень короткие паттерны (<3 символов)
+        - Слишком широкие правила, которые могут поймать много легитимных сообщений
+        
+        Returns:
+            (is_dangerous, reason) - True если DANGEROUS, False если нет
+        """
+        sql_upper = sql_expression.upper()
+        like_patterns = re.findall(r"LIKE\s+'%([^%]+)%'", sql_expression, re.IGNORECASE)
+        
+        # Проверка 1: Очень короткие паттерны (<3 символов) - слишком широкие
+        short_patterns = [p for p in like_patterns if len(p) < 3]
+        if short_patterns:
+            return True, f"Pattern too broad: very short patterns (<3 chars) - {short_patterns}. Insight only, SQL will be commented out."
+        
+        # Проверка 2: Stop words - слишком общие слова, которые встречаются в легитимных сообщениях
+        stop_words_found = [p for p in like_patterns if p.lower() in RuleSafetyClassifier.STOP_WORDS]
+        if stop_words_found:
+            return True, f"Pattern too broad: contains stop words (common words) - {stop_words_found}. Insight only, SQL will be commented out."
+        
+        # Проверка 3: Одно слово без AND и не из whitelist - может быть слишком широким
+        # Например: "Hello", "work", "time" - слишком общие
+        if sql_upper.count("LIKE") == 1 and " AND " not in sql_upper:
+            if like_patterns:
+                pattern_text = like_patterns[0].lower()
+                # Если это не из whitelist и выглядит как общее слово (короткое, без специальных символов)
+                if not RuleSafetyClassifier._is_whitelisted_pattern(pattern_text):
+                    # Проверяем, не слишком ли общее слово (например, одно слово без цифр/спецсимволов)
+                    if len(pattern_text.split()) <= 1 and len(pattern_text) < 10:
+                        # Дополнительная проверка: если это похоже на обычное слово (не домен, не URL)
+                        if not any(char in pattern_text for char in ['.', '/', '@', ':', '?', '=', '&']):
+                            return True, f"Pattern too broad: single common word '{pattern_text}' without AND conditions. Insight only, SQL will be commented out."
+        
+        # Проверка 4: Match everything patterns
+        if "WHERE 1=1" in sql_upper or "WHERE TRUE" in sql_upper:
+            return True, "Pattern matches everything (WHERE 1=1 or WHERE TRUE). Insight only, SQL will be commented out."
+        
+        return False, "Not dangerous"
+    
+    @staticmethod
     def _check_deterministic_safety(
         sql_expression: str,
         pattern: Optional[Pattern] = None,
@@ -220,18 +279,10 @@ class RuleSafetyClassifier:
             (is_safe, reason) - True если безопасно, False если требует проверки
         """
         sql_upper = sql_expression.upper()
-        
-        # Проверка 1: Короткие паттерны (<3 символов)
         like_patterns = re.findall(r"LIKE\s+'%([^%]+)%'", sql_expression, re.IGNORECASE)
-        short_patterns = [p for p in like_patterns if len(p) < 3]
-        if short_patterns:
-            return False, f"Contains very short patterns (<3 chars): {short_patterns}"
         
-        # Проверка 2: Stop words
-        has_stop_words = any(p.lower() in RuleSafetyClassifier.STOP_WORDS for p in like_patterns)
-        if has_stop_words:
-            stop_found = [p for p in like_patterns if p.lower() in RuleSafetyClassifier.STOP_WORDS]
-            return False, f"Contains stop words: {stop_found}"
+        # Примечание: Короткие паттерны и stop words теперь проверяются в _check_dangerous_pattern
+        # Здесь мы проверяем только остальные критерии безопасности
         
         # Проверка 3: Широкие правила (>5 OR без AND, или >7 OR с AND)
         or_count = sql_upper.count(" OR ")
