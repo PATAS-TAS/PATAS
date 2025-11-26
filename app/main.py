@@ -26,7 +26,6 @@ from app.cache import classification_cache
 # Experimental v2 routes (file/image analysis) - currently empty/experimental
 # See app/v2_routes.py for details
 from app.v2_routes import v2_router
-from app.demo_routes import demo_router
 from app.idempotency import check_idempotency, store_idempotency, get_idempotency_key
 from app.pii_redaction import redact_dict, redact_pii
 from app.audit import log_access
@@ -569,7 +568,6 @@ async def version():
 # Include v1 router (must be after all route definitions)
 app.include_router(v1_router)
 app.include_router(v2_router)
-app.include_router(demo_router)
 
 
 @v1_router.get("/export-rules")
