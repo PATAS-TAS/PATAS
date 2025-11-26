@@ -74,6 +74,12 @@ Scripts automate common tasks, run benchmarks, perform analysis, and support dev
 - **`create_repos.sh`** - Create GitHub repositories
 - **`create_github_issues.sh`** - Create GitHub issues
 
+### Production Deployment
+
+- **`run_migrations.py`** - Database migration runner with version tracking, rollback support, and status reporting
+- **`backup_database.sh`** - PostgreSQL backup script with compression, retention policy, checksums, and optional S3 upload
+- **`start_production.sh`** - Production startup script with prerequisite checks, config validation, and migration execution
+
 ### Reporting
 
 - **`generate_honest_report.py`** - Generate honest evaluation report

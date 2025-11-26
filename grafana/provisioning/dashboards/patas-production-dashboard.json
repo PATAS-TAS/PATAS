@@ -1,0 +1,328 @@
+{
+  "dashboard": {
+    "title": "PATAS Production Dashboard",
+    "tags": ["patas", "production", "monitoring", "sla"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 2,
+    "refresh": "30s",
+    "editable": true,
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "enable": true,
+          "iconColor": "green",
+          "expr": "changes(patas_api_version[5m]) > 0"
+        }
+      ]
+    },
+    "rows": [
+      {
+        "title": "SLA Overview",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Service Availability (24h)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "avg_over_time(up{job=\"patas\"}[24h]) * 100",
+                "legendFormat": "Availability %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "orange", "value": 99},
+                    {"color": "green", "value": 99.9}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "P95 Latency (Target: < 500ms)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(patas_api_latency_seconds_bucket[5m])) * 1000",
+                "legendFormat": "P95 ms"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "ms",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 500},
+                    {"color": "red", "value": 1000}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Error Rate (Target: < 1%)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "(sum(rate(patas_api_errors_total[5m])) / sum(rate(patas_api_requests_total[5m]))) * 100",
+                "legendFormat": "Error %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "green", "value": null},
+                    {"color": "orange", "value": 0.5},
+                    {"color": "red", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+          },
+          {
+            "id": 4,
+            "title": "Rule Precision (Target: > 95%)",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "avg(patas_rule_precision_avg) * 100",
+                "legendFormat": "Precision %"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"color": "red", "value": null},
+                    {"color": "orange", "value": 90},
+                    {"color": "green", "value": 95}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+          }
+        ]
+      },
+      {
+        "title": "Traffic & Performance",
+        "panels": [
+          {
+            "id": 10,
+            "title": "Request Rate",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(patas_api_requests_total[5m]))",
+                "legendFormat": "Total"
+              },
+              {
+                "expr": "sum(rate(patas_api_requests_total{endpoint=\"/v1/classify\"}[5m]))",
+                "legendFormat": "Classify"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {"unit": "reqps"}
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+          },
+          {
+            "id": 11,
+            "title": "Latency Distribution",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.50, rate(patas_api_latency_seconds_bucket[5m])) * 1000",
+                "legendFormat": "P50"
+              },
+              {
+                "expr": "histogram_quantile(0.95, rate(patas_api_latency_seconds_bucket[5m])) * 1000",
+                "legendFormat": "P95"
+              },
+              {
+                "expr": "histogram_quantile(0.99, rate(patas_api_latency_seconds_bucket[5m])) * 1000",
+                "legendFormat": "P99"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {"unit": "ms"}
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+          },
+          {
+            "id": 12,
+            "title": "Error Rate Trend",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(patas_api_errors_total[5m])) by (error_type)",
+                "legendFormat": "{{error_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {"unit": "short"}
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+          },
+          {
+            "id": 13,
+            "title": "Response Codes",
+            "type": "piechart",
+            "targets": [
+              {
+                "expr": "sum(increase(patas_api_requests_total[1h])) by (status_code)",
+                "legendFormat": "{{status_code}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+          }
+        ]
+      },
+      {
+        "title": "Business Metrics",
+        "panels": [
+          {
+            "id": 20,
+            "title": "Messages Processed",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(patas_messages_processed_total[5m])) by (label)",
+                "legendFormat": "{{label}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 8, "x": 0, "y": 20}
+          },
+          {
+            "id": 21,
+            "title": "Pattern Discovery",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "sum(rate(patas_pattern_discovery_total[5m])) by (source)",
+                "legendFormat": "{{source}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20}
+          },
+          {
+            "id": 22,
+            "title": "Rule Precision by Tier",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "avg(patas_rule_precision_avg) by (profile)",
+                "legendFormat": "{{profile}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {"unit": "percentunit"}
+            },
+            "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20}
+          },
+          {
+            "id": 23,
+            "title": "False Positive Rate",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "patas_false_positive_rate",
+                "legendFormat": "{{profile}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {"unit": "percentunit"}
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28}
+          },
+          {
+            "id": 24,
+            "title": "Active Rules by Status",
+            "type": "bargauge",
+            "targets": [
+              {
+                "expr": "patas_active_rules",
+                "legendFormat": "{{status}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28}
+          }
+        ]
+      },
+      {
+        "title": "Infrastructure",
+        "panels": [
+          {
+            "id": 30,
+            "title": "Database Pool Usage",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "patas_db_pool_usage",
+                "legendFormat": "{{pool_type}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36}
+          },
+          {
+            "id": 31,
+            "title": "Cache Hit Rate",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "patas_cache_hit_rate",
+                "legendFormat": "{{cache_type}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {"unit": "percent"}
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 36}
+          }
+        ]
+      },
+      {
+        "title": "Alerts",
+        "panels": [
+          {
+            "id": 40,
+            "title": "Active Alerts",
+            "type": "alertlist",
+            "options": {
+              "showOptions": "current",
+              "sortOrder": 1,
+              "stateFilter": {
+                "firing": true,
+                "pending": true
+              }
+            },
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 44}
+          }
+        ]
+      }
+    ]
+  },
+  "folderId": 0,
+  "overwrite": true
+}
+

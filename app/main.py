@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 import time
 import logging
 from contextlib import asynccontextmanager
-from app.config import settings
+from app.config import settings, validate_settings_for_production, ProductionConfigError
 from app.database import get_db, init_db
 import os
 from app.schemas import (
@@ -17,7 +17,7 @@ from app.schemas import (
     SignatureResponse,
 )
 from app.pipeline import pipeline
-from app.security import validate_api_key, check_rate_limit, check_waf
+from app.security import validate_api_key, check_rate_limit, check_waf, safe_error_detail
 from app.repositories import StatsRepository
 from app.logging_config import setup_logging
 from app.pattern_analyzer import analyze_csv, generate_sql_blocking_rules
@@ -53,7 +53,24 @@ async def lifespan(app: FastAPI):
     
     setup_logging()
     logger.info("Starting PATAS - Pattern-Adaptive Transmodal Anti-Spam System")
-    logger.info(f"Environment: DISABLE_OTEL={os.getenv('DISABLE_OTEL', '0')}, ENABLE_LLM={os.getenv('ENABLE_LLM', 'true')}, STARTUP_SOFT={os.getenv('STARTUP_SOFT', '0')}")
+    logger.info(f"Environment: {settings.environment}, DISABLE_OTEL={os.getenv('DISABLE_OTEL', '0')}, ENABLE_LLM={os.getenv('ENABLE_LLM', 'true')}, STARTUP_SOFT={os.getenv('STARTUP_SOFT', '0')}")
+    
+    # Validate production configuration (fail fast on misconfiguration)
+    if settings.is_production():
+        try:
+            validate_settings_for_production()
+            logger.info("Production configuration validated successfully")
+            
+            # Log warnings (non-critical issues)
+            warnings = settings.get_production_warnings()
+            for warning in warnings:
+                logger.warning(f"Production config warning: {warning}")
+                
+        except ProductionConfigError as e:
+            logger.error(f"Production configuration validation failed: {e}")
+            if not settings.startup_soft:
+                raise
+            logger.warning("Continuing with invalid production config (STARTUP_SOFT=1)")
     
     # Initialize OpenTelemetry (skip if DISABLE_OTEL=1)
     otel_start = time_module.time()
@@ -204,16 +221,52 @@ app = FastAPI(
 from fastapi import APIRouter
 v1_router = APIRouter(prefix="/v1", tags=["v1"])
 
+# CORS Configuration - controlled via environment variables
+# In production, use CORS_ORIGINS env var to restrict to specific domains
+# Default: Empty in production (deny all), ["*"] in development
+cors_origins = settings.get_cors_origins()
+if settings.is_production() and cors_origins == ["*"]:
+    logger.warning(
+        "CORS is configured to allow all origins in production. "
+        "Set CORS_ORIGINS environment variable to restrict to specific domains."
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=cors_origins,
+    allow_credentials=settings.cors_allow_credentials,
+    allow_methods=settings.cors_allow_methods.split(",") if settings.cors_allow_methods != "*" else ["*"],
+    allow_headers=settings.cors_allow_headers.split(",") if settings.cors_allow_headers != "*" else ["*"],
 )
 
 # Add latency profiling middleware (replaces simple timing middleware)
 app.add_middleware(LatencyProfilingMiddleware)
+
+
+# Request body size limit middleware
+@app.middleware("http")
+async def request_size_limit_middleware(request: Request, call_next):
+    """
+    Limit request body size to prevent DoS attacks.
+    
+    Rejects requests with Content-Length exceeding api_max_request_size.
+    """
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            size = int(content_length)
+            if size > settings.api_max_request_size:
+                return JSONResponse(
+                    status_code=413,
+                    content={
+                        "detail": f"Request body too large. Maximum size is {settings.api_max_request_size // (1024*1024)}MB"
+                    }
+                )
+        except ValueError:
+            pass
+    
+    return await call_next(request)
+
 
 # Add trace ID middleware
 @app.middleware("http")
@@ -410,7 +463,7 @@ async def train(
         logger.error(f"Error recording training example: {e}", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to record training example: {str(e)}"
+            detail=safe_error_detail("Training example recording", e)
         )
 
 
@@ -477,7 +530,18 @@ async def stats(request: Request, db=Depends(dep_get_db), metrics: MetricsProvid
 
 
 @app.get("/healthz")
-async def healthz():
+async def healthz(detailed: bool = False):
+    """
+    Simple health check endpoint for load balancers and container orchestration.
+    
+    Args:
+        detailed: If True, returns detailed component health status.
+    """
+    if detailed:
+        from app.health import get_system_health
+        health = await get_system_health(version=app.version)
+        return health.to_dict()
+    
     return {"ok": True}
 
 
@@ -503,7 +567,7 @@ async def latency_stats(request: Request):
         raise
     except Exception as e:
         logger.error(f"Error in latency-stats: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to get latency stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Latency stats retrieval", e))
 
 
 @app.get("/llm-cache-stats")
@@ -521,7 +585,7 @@ async def llm_cache_stats(request: Request):
         raise
     except Exception as e:
         logger.error(f"Error in llm-cache-stats: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to get cache stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Cache stats retrieval", e))
 
 
 @app.post("/llm-cache/invalidate")
@@ -538,7 +602,7 @@ async def invalidate_llm_cache(request: Request):
         raise
     except Exception as e:
         logger.error(f"Error invalidating cache: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to invalidate cache: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Cache invalidation", e))
 
 
 @app.post("/llm-cache/model-version")
@@ -556,7 +620,7 @@ async def update_model_version(request: Request, version: str = Form(...)):
         raise
     except Exception as e:
         logger.error(f"Error updating model version: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to update model version: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Model version update", e))
 
 
 @app.get("/version")
@@ -597,7 +661,7 @@ async def export_rules(
         raise
     except Exception as e:
         logger.error(f"Error in export-rules: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Rule export failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Rule export", e))
 
 
 @v1_router.post("/get-signature", response_model=SignatureResponse)
@@ -637,7 +701,7 @@ async def get_signature(
         raise
     except Exception as e:
         logger.error(f"Error in get-signature: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Signature generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Signature generation", e))
 
 
 @v1_router.post("/analyze-patterns")
@@ -750,7 +814,7 @@ async def analyze_patterns(
         raise
     except Exception as e:
         logger.error(f"Error in analyze-patterns: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Pattern analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=safe_error_detail("Pattern analysis", e))
 
 
 # Include v1 router (must be after all route definitions)

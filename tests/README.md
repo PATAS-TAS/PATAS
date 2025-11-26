@@ -202,7 +202,16 @@ Recent improvements:
 - SQL parser testing with sqlparse library
 
 See `COVERAGE_IMPROVEMENTS.md` for details.
-- `test_graceful_degradation.py` - Graceful degradation tests
+
+**Graceful Degradation:**
+- `test_graceful_degradation.py` - Basic graceful degradation tests
+- `test_graceful_degradation_production.py` - Production graceful degradation tests (DB, Redis, LLM failures)
+
+**Load Testing (`load/`):**
+- `locustfile.py` - Locust load testing suite for performance and stress testing
+  - `PATASUser` - Simulates typical API users (classify, stats, health)
+  - `PATASBatchUser` - Simulates batch processing users
+  - `PATASAdminUser` - Simulates admin operations
 
 **Test Data:**
 - `data/challenging_test_dataset.json` - Challenging test cases
@@ -251,6 +260,21 @@ python tests/test_improvements_simple.py
 
 # SQL parser completion validation
 python tests/test_sql_parser_complete.py
+```
+
+### Run Load Tests
+
+```bash
+# Install Locust
+pip install locust
+
+# Start Locust web UI
+locust -f tests/load/locustfile.py --host http://localhost:8000
+
+# Headless mode (100 users, 10 users/sec spawn rate, 5 min duration)
+API_KEY=your-key locust -f tests/load/locustfile.py \
+  --headless -u 100 -r 10 -t 5m \
+  --host http://localhost:8000
 ```
 
 ## Test Categories

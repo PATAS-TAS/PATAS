@@ -99,6 +99,68 @@ if PROMETHEUS_AVAILABLE:
         ['pattern_type']  # pattern_type: url, phone, text, keyword, etc.
     )
     
+    # Business metrics for production monitoring
+    pattern_discovery_rate = Counter(
+        'patas_pattern_discovery_total',
+        'Total number of patterns discovered during mining',
+        ['source']  # source: url, keyword, semantic, phone
+    )
+    
+    rule_precision_gauge = Gauge(
+        'patas_rule_precision',
+        'Current precision of rules',
+        ['rule_id', 'tier']
+    )
+    
+    rule_precision_avg = Gauge(
+        'patas_rule_precision_avg',
+        'Average precision across all active rules',
+        ['profile']
+    )
+    
+    false_positive_rate = Gauge(
+        'patas_false_positive_rate',
+        'Current false positive rate',
+        ['profile']
+    )
+    
+    messages_processed_total = Counter(
+        'patas_messages_processed_total',
+        'Total number of messages processed',
+        ['label']  # label: spam, ham
+    )
+    
+    api_requests_total = Counter(
+        'patas_api_requests_total',
+        'Total API requests',
+        ['method', 'endpoint', 'status_code']
+    )
+    
+    api_latency_seconds = Histogram(
+        'patas_api_latency_seconds',
+        'API request latency',
+        ['method', 'endpoint'],
+        buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+    )
+    
+    api_errors_total = Counter(
+        'patas_api_errors_total',
+        'Total API errors',
+        ['error_type', 'endpoint']
+    )
+    
+    db_pool_usage = Gauge(
+        'patas_db_pool_usage',
+        'Database connection pool usage',
+        ['pool_type']  # pool_type: active, idle, overflow
+    )
+    
+    cache_hit_rate = Gauge(
+        'patas_cache_hit_rate',
+        'Cache hit rate percentage',
+        ['cache_type']  # cache_type: llm, embedding, classification
+    )
+    
     logger.info("Prometheus metrics initialized")
 else:
     # No-op metrics
@@ -108,6 +170,16 @@ else:
     evaluation_latency_seconds = NoOpHistogram()
     active_rules_gauge = NoOpGauge()
     patterns_created_total = NoOpCounter()
+    pattern_discovery_rate = NoOpCounter()
+    rule_precision_gauge = NoOpGauge()
+    rule_precision_avg = NoOpGauge()
+    false_positive_rate = NoOpGauge()
+    messages_processed_total = NoOpCounter()
+    api_requests_total = NoOpCounter()
+    api_latency_seconds = NoOpHistogram()
+    api_errors_total = NoOpCounter()
+    db_pool_usage = NoOpGauge()
+    cache_hit_rate = NoOpGauge()
     logger.info("Prometheus metrics not available, using no-op implementations")
 
 
@@ -194,3 +266,151 @@ def get_metrics_registry():
 def is_prometheus_available() -> bool:
     """Check if Prometheus client is available."""
     return PROMETHEUS_AVAILABLE
+
+
+# Additional convenience functions for business metrics
+
+def record_pattern_discovery(source: str, count: int = 1):
+    """
+    Record patterns discovered during mining.
+    
+    Args:
+        source: Pattern source (url, keyword, semantic, phone)
+        count: Number of patterns discovered
+    """
+    for _ in range(count):
+        pattern_discovery_rate.labels(source=source).inc()
+
+
+def update_rule_precision(rule_id: int, precision: float, tier: str = "unknown"):
+    """
+    Update precision for a specific rule.
+    
+    Args:
+        rule_id: Rule ID
+        precision: Precision value (0.0 to 1.0)
+        tier: Rule tier (safe_auto, review_only, feature_only)
+    """
+    rule_precision_gauge.labels(rule_id=str(rule_id), tier=tier).set(precision)
+
+
+def update_average_precision(profile: str, precision: float):
+    """
+    Update average precision across all rules for a profile.
+    
+    Args:
+        profile: Profile name (conservative, balanced, aggressive)
+        precision: Average precision value
+    """
+    rule_precision_avg.labels(profile=profile).set(precision)
+
+
+def update_false_positive_rate(profile: str, rate: float):
+    """
+    Update false positive rate for a profile.
+    
+    Args:
+        profile: Profile name
+        rate: False positive rate (0.0 to 1.0)
+    """
+    false_positive_rate.labels(profile=profile).set(rate)
+
+
+def record_message_processed(label: str):
+    """
+    Record that a message was processed.
+    
+    Args:
+        label: Message label (spam, ham)
+    """
+    messages_processed_total.labels(label=label).inc()
+
+
+def record_api_request(method: str, endpoint: str, status_code: int):
+    """
+    Record an API request.
+    
+    Args:
+        method: HTTP method (GET, POST, etc.)
+        endpoint: API endpoint path
+        status_code: HTTP response status code
+    """
+    api_requests_total.labels(
+        method=method,
+        endpoint=endpoint,
+        status_code=str(status_code)
+    ).inc()
+
+
+def record_api_latency(method: str, endpoint: str, latency_seconds: float):
+    """
+    Record API request latency.
+    
+    Args:
+        method: HTTP method
+        endpoint: API endpoint path
+        latency_seconds: Request latency in seconds
+    """
+    api_latency_seconds.labels(method=method, endpoint=endpoint).observe(latency_seconds)
+
+
+def record_api_error(error_type: str, endpoint: str):
+    """
+    Record an API error.
+    
+    Args:
+        error_type: Type of error
+        endpoint: API endpoint path
+    """
+    api_errors_total.labels(error_type=error_type, endpoint=endpoint).inc()
+
+
+def update_db_pool_usage(active: int, idle: int, overflow: int):
+    """
+    Update database connection pool usage metrics.
+    
+    Args:
+        active: Number of active connections
+        idle: Number of idle connections
+        overflow: Number of overflow connections
+    """
+    db_pool_usage.labels(pool_type="active").set(active)
+    db_pool_usage.labels(pool_type="idle").set(idle)
+    db_pool_usage.labels(pool_type="overflow").set(overflow)
+
+
+def update_cache_hit_rate(cache_type: str, hit_rate: float):
+    """
+    Update cache hit rate.
+    
+    Args:
+        cache_type: Type of cache (llm, embedding, classification)
+        hit_rate: Hit rate percentage (0.0 to 100.0)
+    """
+    cache_hit_rate.labels(cache_type=cache_type).set(hit_rate)
+
+
+def get_metrics_content() -> str:
+    """
+    Get Prometheus metrics in text format.
+    
+    Returns:
+        Prometheus metrics as text for /metrics endpoint
+    """
+    if PROMETHEUS_AVAILABLE:
+        from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+        return generate_latest(REGISTRY).decode('utf-8')
+    return "# Prometheus metrics not available\n"
+
+
+def get_content_type() -> str:
+    """
+    Get content type for metrics endpoint.
+    
+    Returns:
+        Content type string for Prometheus metrics
+    """
+    if PROMETHEUS_AVAILABLE:
+        from prometheus_client import CONTENT_TYPE_LATEST
+        return CONTENT_TYPE_LATEST
+    return "text/plain"

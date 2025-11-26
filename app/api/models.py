@@ -145,11 +145,22 @@ class PromoteRulesResponse(BaseModel):
     message: str = "Promotion/rollback completed"
 
 
+class ComponentHealthResponse(BaseModel):
+    """Health status of a single component."""
+    healthy: bool
+    latency_ms: Optional[float] = None
+    message: Optional[str] = None
+    details: Optional[Dict[str, Any]] = None
+
+
 class HealthResponse(BaseModel):
     """Health check response."""
-    status: str = "ok"
+    status: str = "ok"  # "healthy", "degraded", "unhealthy"
     version: Optional[str] = None
+    environment: Optional[str] = None
+    timestamp: Optional[str] = None
     core_ready: bool = True
+    components: Optional[Dict[str, ComponentHealthResponse]] = None
 
 
 class AnalyzeRequest(BaseModel):

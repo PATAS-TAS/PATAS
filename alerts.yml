@@ -1,70 +1,170 @@
+# PATAS Production Alerting Rules
+# Configure alertmanager to route these alerts appropriately
+
 groups:
-  - name: patas_alerts
+  - name: patas_critical
     interval: 30s
     rules:
-      # High false positive rate
-      - alert: HighFalsePositiveRate
-        expr: |
-          rate(patas_rule_evaluation_ham_hits_total[5m]) > 0.1
-        for: 5m
+      # Service availability
+      - alert: PATASServiceDown
+        expr: up{job="patas"} == 0
+        for: 1m
         labels:
-          severity: warning
+          severity: critical
+          team: platform
         annotations:
-          summary: "High false positive rate detected"
-          description: "Rule evaluation shows high ham hits rate (>10%) over last 5 minutes"
+          summary: "PATAS service is down"
+          description: "PATAS API endpoint {{ $labels.instance }} is not responding"
+          runbook_url: "https://wiki/patas/runbooks/service-down"
 
-      # Rule precision degradation
-      - alert: RulePrecisionDegradation
-        expr: |
-          (patas_rule_evaluation_precision - patas_rule_evaluation_previous_precision) < -0.1
+      # Database connectivity
+      - alert: DatabaseConnectionFailed
+        expr: patas_db_pool_usage{pool_type="active"} == 0 and patas_db_pool_usage{pool_type="idle"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Database connection pool empty"
+          description: "No database connections available - service may be unable to process requests"
+          runbook_url: "https://wiki/patas/runbooks/database-connection"
+
+      # Rule precision critical drop
+      - alert: RulePrecisionCritical
+        expr: patas_rule_precision_avg{profile="conservative"} < 0.85
         for: 10m
         labels:
           severity: critical
+          team: ml
         annotations:
-          summary: "Rule precision dropped significantly"
-          description: "Rule {{ $labels.rule_id }} precision dropped by more than 10%"
+          summary: "Critical drop in rule precision"
+          description: "Average rule precision for {{ $labels.profile }} profile dropped below 85%"
+          runbook_url: "https://wiki/patas/runbooks/rule-precision"
 
-      # Service unavailable
-      - alert: PATASServiceDown
+  - name: patas_warning
+    interval: 30s
+    rules:
+      # High error rate (>1%)
+      - alert: HighErrorRate
         expr: |
-          up{job="patas"} == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: "PATAS service is down"
-          description: "PATAS API endpoint is not responding"
-
-      # High API latency
-      - alert: HighAPILatency
-        expr: |
-          histogram_quantile(0.95, rate(patas_api_request_duration_seconds_bucket[5m])) > 2.0
+          sum(rate(patas_api_errors_total[5m])) / sum(rate(patas_api_requests_total[5m])) > 0.01
         for: 5m
         labels:
           severity: warning
+          team: platform
         annotations:
-          summary: "High API latency detected"
-          description: "95th percentile API latency exceeds 2 seconds"
+          summary: "High API error rate"
+          description: "Error rate exceeds 1% over the last 5 minutes ({{ $value | printf \"%.2f\" }}%)"
+          runbook_url: "https://wiki/patas/runbooks/high-error-rate"
+
+      # High API latency (P95 > 500ms)
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.95, rate(patas_api_latency_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High API latency (P95 > 500ms)"
+          description: "95th percentile API latency is {{ $value | printf \"%.2f\" }}s"
+          runbook_url: "https://wiki/patas/runbooks/high-latency"
+
+      # Low rule precision (<90%)
+      - alert: LowRulePrecision
+        expr: patas_rule_precision_avg{profile="balanced"} < 0.90
+        for: 15m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "Low rule precision"
+          description: "Average rule precision for {{ $labels.profile }} profile is {{ $value | printf \"%.2f\" }}"
+          runbook_url: "https://wiki/patas/runbooks/rule-precision"
+
+      # High false positive rate
+      - alert: HighFalsePositiveRate
+        expr: patas_false_positive_rate > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          team: ml
+        annotations:
+          summary: "High false positive rate"
+          description: "False positive rate for {{ $labels.profile }} is {{ $value | printf \"%.2f\" }}%"
+          runbook_url: "https://wiki/patas/runbooks/false-positives"
+
+      # Database connection pool exhaustion
+      - alert: DatabasePoolExhaustion
+        expr: |
+          patas_db_pool_usage{pool_type="active"} / 
+          (patas_db_pool_usage{pool_type="active"} + patas_db_pool_usage{pool_type="idle"}) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Database connection pool near exhaustion"
+          description: "Database connection pool is {{ $value | printf \"%.0f\" }}% utilized"
+          runbook_url: "https://wiki/patas/runbooks/database-pool"
+
+      # Low cache hit rate
+      - alert: LowCacheHitRate
+        expr: patas_cache_hit_rate{cache_type="llm"} < 50
+        for: 30m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low LLM cache hit rate"
+          description: "LLM cache hit rate is {{ $value | printf \"%.0f\" }}%"
+          runbook_url: "https://wiki/patas/runbooks/cache-performance"
 
       # Pattern mining failure
       - alert: PatternMiningFailure
-        expr: |
-          increase(patas_pattern_mining_errors_total[5m]) > 0
+        expr: increase(patas_api_errors_total{endpoint="/api/v1/patterns/mine"}[5m]) > 0
         for: 1m
         labels:
           severity: warning
+          team: ml
         annotations:
           summary: "Pattern mining errors detected"
           description: "Pattern mining encountered errors in the last 5 minutes"
+          runbook_url: "https://wiki/patas/runbooks/pattern-mining"
 
-      # Low rule coverage
-      - alert: LowRuleCoverage
-        expr: |
-          avg(patas_rule_evaluation_coverage) < 0.01
-        for: 30m
+  - name: patas_info
+    interval: 60s
+    rules:
+      # Low pattern discovery rate
+      - alert: LowPatternDiscoveryRate
+        expr: rate(patas_pattern_discovery_total[1h]) < 1
+        for: 2h
         labels:
           severity: info
+          team: ml
         annotations:
-          summary: "Low rule coverage"
-          description: "Average rule coverage is below 1% for 30 minutes"
+          summary: "Low pattern discovery rate"
+          description: "Fewer than 1 pattern discovered per hour for the last 2 hours"
+
+      # No messages processed
+      - alert: NoMessagesProcessed
+        expr: rate(patas_messages_processed_total[1h]) == 0
+        for: 1h
+        labels:
+          severity: info
+          team: platform
+        annotations:
+          summary: "No messages processed"
+          description: "No messages have been processed in the last hour"
+
+      # Rule count anomaly
+      - alert: ActiveRuleCountLow
+        expr: patas_active_rules{status="active"} < 10
+        for: 1h
+        labels:
+          severity: info
+          team: ml
+        annotations:
+          summary: "Low number of active rules"
+          description: "Only {{ $value }} active rules - consider running pattern mining"
 

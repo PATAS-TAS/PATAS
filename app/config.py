@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     max_text_length: int = 8192
     model_name: str = "unitary/multilingual-toxic-xlm-roberta"
     log_level: str = "INFO"
+    log_format: str = ""  # "json" for structured JSON logs, "text" for standard format. Default: text in dev, json in production
     log_file: str = "logs/app.log"
     log_rotation_size: int = 10485760
     log_backup_count: int = 5
@@ -113,10 +114,21 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
     api_reload: bool = False  # Auto-reload in development
+    api_max_request_size: int = 10 * 1024 * 1024  # 10MB max request body size
+    api_max_upload_size: int = 10 * 1024 * 1024  # 10MB max file upload size
     
     # IP whitelisting
     enable_ip_whitelist: bool = False  # Enable IP whitelisting
     ip_whitelist: str = ""  # Comma-separated list of allowed IP addresses or CIDR ranges (e.g., "192.168.1.0/24,10.0.0.1")
+    
+    # CORS Configuration
+    # In production, restrict to specific origins. Use comma-separated list.
+    # Empty string means no origins allowed (most secure).
+    # Use "*" only for development (NOT recommended for production).
+    cors_origins: str = ""  # Comma-separated allowed origins (e.g., "https://app.example.com,https://admin.example.com")
+    cors_allow_credentials: bool = True
+    cors_allow_methods: str = "*"  # Comma-separated methods or "*" for all
+    cors_allow_headers: str = "*"  # Comma-separated headers or "*" for all
 
     @field_validator("api_keys", mode="before")
     @classmethod
@@ -140,6 +152,191 @@ class Settings(BaseSettings):
                 result.append((pair, "default"))
         return result
 
+    def get_cors_origins(self) -> List[str]:
+        """Get list of allowed CORS origins.
+        
+        Returns:
+            List of allowed origin URLs. Empty list means no origins allowed.
+            ["*"] means all origins (development only, not secure for production).
+        """
+        if not self.cors_origins:
+            # In production, default to no origins (most secure)
+            if self.environment == "production":
+                return []
+            # In development, allow all origins for convenience
+            return ["*"]
+        if self.cors_origins.strip() == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    def is_production(self) -> bool:
+        """Check if running in production environment."""
+        return self.environment.lower() == "production"
+
+    def validate_production_config(self) -> List[str]:
+        """Validate configuration for production environment.
+        
+        Returns:
+            List of validation error messages. Empty list means valid.
+        """
+        errors: List[str] = []
+        warnings: List[str] = []
+        
+        if not self.is_production():
+            return errors
+        
+        # =================================================================
+        # CRITICAL: Must be configured for production
+        # =================================================================
+        
+        # API keys are required in production
+        if not self.api_keys:
+            errors.append(
+                "API_KEYS must be configured in production. "
+                "Set API_KEYS environment variable (format: 'key1:namespace1,key2:namespace2')"
+            )
+        
+        # Database URL should not be SQLite in production
+        if "sqlite" in self.database_url.lower():
+            errors.append(
+                "SQLite is not recommended for production. "
+                "Use PostgreSQL: DATABASE_URL=postgresql+asyncpg://user:pass@host/db"
+            )
+        
+        # API reload should be disabled in production
+        if self.api_reload:
+            errors.append(
+                "API_RELOAD must be False in production. "
+                "Auto-reload is only for development."
+            )
+        
+        # Log level should not be DEBUG in production
+        if self.log_level.upper() == "DEBUG":
+            warnings.append(
+                "LOG_LEVEL=DEBUG is not recommended for production. "
+                "Use INFO or WARNING for better performance."
+            )
+        
+        # =================================================================
+        # SECURITY: Recommended for production
+        # =================================================================
+        
+        # CORS should be explicitly configured
+        cors_origins = self.get_cors_origins()
+        if cors_origins == ["*"]:
+            warnings.append(
+                "CORS_ORIGINS='*' allows all origins - not secure for production. "
+                "Set to specific domains: CORS_ORIGINS='https://app.example.com'"
+            )
+        
+        # Privacy mode should be STRICT for on-premise
+        if self.privacy_mode != "STRICT":
+            warnings.append(
+                "PRIVACY_MODE=STRICT is recommended for on-premise production. "
+                "This prevents external API calls and enables full PII redaction."
+            )
+        
+        # IP whitelisting should be considered
+        if not self.enable_ip_whitelist:
+            warnings.append(
+                "Consider enabling IP whitelisting (ENABLE_IP_WHITELIST=true) "
+                "for additional security in production."
+            )
+        
+        # =================================================================
+        # LLM/Embedding: Validate provider configuration
+        # =================================================================
+        
+        # If using OpenAI, require API key
+        if self.llm_provider == "openai" and not self.llm_api_key:
+            errors.append(
+                "LLM_API_KEY required when using OpenAI LLM provider. "
+                "Set LLM_API_KEY or switch to LLM_PROVIDER=local or LLM_PROVIDER=none"
+            )
+        
+        if self.embedding_provider == "openai" and not self.embedding_api_key and not self.llm_api_key:
+            errors.append(
+                "EMBEDDING_API_KEY or LLM_API_KEY required when using OpenAI embedding provider. "
+                "Set EMBEDDING_API_KEY or switch to EMBEDDING_PROVIDER=local or EMBEDDING_PROVIDER=none"
+            )
+        
+        # If using local, require base URL
+        if self.llm_provider == "local" and not self.llm_base_url:
+            errors.append(
+                "LLM_BASE_URL required when using local LLM provider. "
+                "Set LLM_BASE_URL to your local model endpoint (e.g., http://localhost:8000/v1)"
+            )
+        
+        if self.embedding_provider == "local" and not self.embedding_base_url:
+            errors.append(
+                "EMBEDDING_BASE_URL required when using local embedding provider. "
+                "Set EMBEDDING_BASE_URL to your local model endpoint"
+            )
+        
+        return errors
+    
+    def get_production_warnings(self) -> List[str]:
+        """Get warnings for production configuration.
+        
+        These are non-critical issues that should be addressed but won't prevent startup.
+        
+        Returns:
+            List of warning messages.
+        """
+        warnings: List[str] = []
+        
+        if not self.is_production():
+            return warnings
+        
+        # CORS configuration
+        cors_origins = self.get_cors_origins()
+        if cors_origins == ["*"]:
+            warnings.append(
+                "CORS allows all origins - consider restricting in production"
+            )
+        
+        # Privacy mode
+        if self.privacy_mode != "STRICT":
+            warnings.append(
+                "PRIVACY_MODE=STRICT recommended for production"
+            )
+        
+        # IP whitelisting
+        if not self.enable_ip_whitelist:
+            warnings.append(
+                "IP whitelisting disabled - consider enabling for security"
+            )
+        
+        # Log level
+        if self.log_level.upper() == "DEBUG":
+            warnings.append(
+                "DEBUG logging may impact performance"
+            )
+        
+        # Audit logging
+        if not self.audit_enabled:
+            warnings.append(
+                "Audit logging disabled - recommended for compliance"
+            )
+        
+        return warnings
+
 
 settings = Settings()
+
+
+class ProductionConfigError(Exception):
+    """Raised when production configuration is invalid."""
+    pass
+
+
+def validate_settings_for_production():
+    """Validate settings for production and raise error if invalid.
+    
+    Call this at startup to fail fast on misconfiguration.
+    """
+    errors = settings.validate_production_config()
+    if errors:
+        error_msg = "Production configuration errors:\n" + "\n".join(f"  - {e}" for e in errors)
+        raise ProductionConfigError(error_msg)
 

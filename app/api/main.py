@@ -70,8 +70,38 @@ async def startup_event():
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)
-async def health_check():
-    """Health check endpoint."""
+async def health_check(detailed: bool = False):
+    """
+    Health check endpoint.
+    
+    Args:
+        detailed: If True, returns detailed component health status.
+                  If False, returns simple health status (faster).
+    
+    Returns:
+        HealthResponse with system status and optional component details.
+    """
+    if detailed:
+        from app.health import get_system_health
+        health = await get_system_health(version="2.0.0")
+        return HealthResponse(
+            status=health.status,
+            version=health.version,
+            environment=health.environment,
+            timestamp=health.timestamp,
+            core_ready=health.status != "unhealthy",
+            components={
+                name: {
+                    "healthy": comp.healthy,
+                    "latency_ms": comp.latency_ms,
+                    "message": comp.message,
+                    "details": comp.details if comp.details else None,
+                }
+                for name, comp in health.components.items()
+            }
+        )
+    
+    # Simple health check (faster, for load balancers)
     return HealthResponse(
         status="ok",
         version="2.0.0",

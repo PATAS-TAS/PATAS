@@ -1,19 +1,137 @@
+"""
+PATAS Security Module
+
+Provides security features for the PATAS API:
+- Rate limiting (in-memory and Redis-based distributed)
+- WAF (Web Application Firewall) checks
+- IP whitelisting
+- API key validation
+- Safe error handling for production
+
+Configuration Examples:
+
+    # In-memory rate limiting (single instance)
+    API_KEYS=mykey:namespace1
+    DEFAULT_RATE_LIMIT=100
+    
+    # Redis-based distributed rate limiting (multi-instance)
+    REDIS_URL=redis://localhost:6379/0
+    DEFAULT_RATE_LIMIT=100
+    
+    # IP whitelisting
+    ENABLE_IP_WHITELIST=true
+    IP_WHITELIST=192.168.1.0/24,10.0.0.1
+"""
+
 from fastapi import HTTPException, Request
 from app.config import settings
 import re
 import time
 import ipaddress
+import logging
 from collections import defaultdict
 from typing import Optional, Dict, List, Set
 
+logger = logging.getLogger(__name__)
+
+# In-memory stores for single-instance deployments
 rate_limit_store: Dict[str, List[float]] = defaultdict(list)
 waf_burst_store: Dict[str, List[float]] = defaultdict(list)
 _ip_whitelist_cache: Optional[Set[ipaddress.IPv4Network | ipaddress.IPv6Network]] = None
 
+# Redis client for distributed rate limiting
+_redis_client = None
 
-def check_rate_limit(api_key: str, rate_limit: int = 10) -> bool:
+
+def _get_redis_client():
     """
-    Check rate limit: allows rate_limit requests per second.
+    Get or create Redis client for distributed rate limiting.
+    
+    Returns None if Redis is not configured or available.
+    """
+    global _redis_client
+    
+    if _redis_client is not None:
+        return _redis_client
+    
+    if not settings.redis_url:
+        return None
+    
+    try:
+        import redis
+        _redis_client = redis.from_url(
+            settings.redis_url,
+            decode_responses=True,
+            socket_connect_timeout=2,
+            max_connections=getattr(settings, 'redis_max_connections', 200),
+        )
+        _redis_client.ping()
+        logger.info("Redis rate limiting enabled")
+        return _redis_client
+    except ImportError:
+        logger.warning("Redis package not installed, using in-memory rate limiting")
+        return None
+    except Exception as e:
+        logger.warning(f"Redis connection failed, using in-memory rate limiting: {e}")
+        return None
+
+
+def check_rate_limit_redis(api_key: str, rate_limit: int = 10) -> bool:
+    """
+    Check rate limit using Redis (distributed, multi-instance safe).
+    
+    Uses a sliding window algorithm with Redis sorted sets.
+    
+    Args:
+        api_key: API key for rate limiting
+        rate_limit: Maximum requests per second
+    
+    Returns:
+        True if request is allowed, False if rate limited
+    """
+    redis_client = _get_redis_client()
+    if not redis_client:
+        return check_rate_limit_memory(api_key, rate_limit)
+    
+    try:
+        now = time.time()
+        window_start = now - 1.0
+        key = f"ratelimit:{api_key}"
+        
+        # Use a pipeline for atomic operations
+        pipe = redis_client.pipeline()
+        
+        # Remove old entries
+        pipe.zremrangebyscore(key, 0, window_start)
+        
+        # Count current entries
+        pipe.zcard(key)
+        
+        # Add current request
+        pipe.zadd(key, {str(now): now})
+        
+        # Set expiry on the key
+        pipe.expire(key, 2)
+        
+        results = pipe.execute()
+        current_count = results[1]
+        
+        if current_count >= rate_limit:
+            return False
+        
+        return True
+        
+    except Exception as e:
+        logger.warning(f"Redis rate limiting failed, falling back to memory: {e}")
+        return check_rate_limit_memory(api_key, rate_limit)
+
+
+def check_rate_limit_memory(api_key: str, rate_limit: int = 10) -> bool:
+    """
+    Check rate limit using in-memory storage (single instance only).
+    
+    WARNING: This does NOT work across multiple instances.
+    Use Redis-based rate limiting for distributed deployments.
     
     Args:
         api_key: API key for rate limiting
@@ -40,6 +158,36 @@ def check_rate_limit(api_key: str, rate_limit: int = 10) -> bool:
     # Record this request
     rate_limit_store[api_key].append(now)
     return True
+
+
+def check_rate_limit(api_key: str, rate_limit: int = 10) -> bool:
+    """
+    Check rate limit: allows rate_limit requests per second.
+    
+    Automatically uses Redis if configured, otherwise falls back to in-memory.
+    
+    For multi-instance deployments, configure REDIS_URL to enable
+    distributed rate limiting that works across all instances.
+    
+    Args:
+        api_key: API key for rate limiting
+        rate_limit: Maximum requests per second (default: 10)
+    
+    Returns:
+        True if request is allowed, False if rate limited
+    
+    Example:
+        # Configure Redis for distributed rate limiting
+        export REDIS_URL=redis://localhost:6379/0
+        export DEFAULT_RATE_LIMIT=100
+        
+        # In code
+        if not check_rate_limit(api_key, settings.default_rate_limit):
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    """
+    if settings.redis_url:
+        return check_rate_limit_redis(api_key, rate_limit)
+    return check_rate_limit_memory(api_key, rate_limit)
 
 
 def check_waf(text: str, api_key: str) -> bool:
@@ -152,4 +300,53 @@ def validate_api_key(request: Request) -> Optional[str]:
             return namespace
 
     raise HTTPException(status_code=403, detail="Invalid API key")
+
+
+def safe_error_detail(operation: str, error: Exception, include_details: bool = False) -> str:
+    """
+    Generate a safe error message for API responses.
+    
+    In production, returns generic message without exception details.
+    In development, includes exception details for debugging.
+    
+    Args:
+        operation: Description of the operation that failed (e.g., "Classification")
+        error: The exception that was raised
+        include_details: Override to include details even in production (use with caution)
+    
+    Returns:
+        Safe error message string for API response
+    """
+    # In development or if explicitly requested, include details
+    if not settings.is_production() or include_details:
+        return f"{operation} failed: {str(error)}"
+    
+    # In production, return generic message
+    # The actual error is logged separately for debugging
+    return f"{operation} failed"
+
+
+def raise_safe_http_exception(
+    status_code: int,
+    operation: str,
+    error: Exception,
+    logger=None,
+) -> None:
+    """
+    Raise HTTPException with safe error detail.
+    
+    Logs the full error for debugging but returns safe message to client.
+    
+    Args:
+        status_code: HTTP status code
+        operation: Description of the operation that failed
+        error: The exception that was raised
+        logger: Logger instance for logging the error (optional)
+    """
+    # Always log the full error for debugging
+    if logger:
+        logger.error(f"{operation} failed: {error}", exc_info=True)
+    
+    detail = safe_error_detail(operation, error)
+    raise HTTPException(status_code=status_code, detail=detail)
 

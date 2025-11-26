@@ -1,0 +1,169 @@
+# PATAS Production Docker Compose
+# 
+# Usage:
+#   docker-compose -f docker-compose.prod.yml up -d
+#
+# Required environment variables (create .env.production file):
+#   - DATABASE_URL
+#   - API_KEYS
+#   - LLM_API_KEY (if using OpenAI)
+#   - CORS_ORIGINS (comma-separated allowed origins)
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: patas-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: patas
+      POSTGRES_USER: patas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - patas-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patas -d patas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for distributed rate limiting and caching
+  redis:
+    image: redis:7-alpine
+    container_name: patas-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - patas-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PATAS API Service
+  patas:
+    image: ${PATAS_IMAGE:-patas:latest}
+    container_name: patas-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://patas:${POSTGRES_PASSWORD:-changeme}@postgres:5432/patas
+      REDIS_URL: redis://redis:6379/0
+      API_KEYS: ${API_KEYS}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-none}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      PRIVACY_MODE: ${PRIVACY_MODE:-STRICT}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: json
+    ports:
+      - "${API_PORT:-8000}:8000"
+    networks:
+      - patas-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: patas-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - patas-network
+    depends_on:
+      - patas
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: patas-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ''
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_SERVER_ROOT_URL: ${GRAFANA_URL:-http://localhost:3000}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - patas-network
+    depends_on:
+      - prometheus
+
+  # Alertmanager for alert routing
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: patas-alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    ports:
+      - "9093:9093"
+    networks:
+      - patas-network
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  alertmanager-data:
+    driver: local
+
+networks:
+  patas-network:
+    driver: bridge
+
