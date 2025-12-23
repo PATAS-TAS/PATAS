@@ -50,7 +50,7 @@ class StatsRepository:
         await self.db.commit()
 
     async def get_stats_24h(self) -> dict:
-        cutoff = datetime.utcnow() - timedelta(hours=24)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
         total_reqs = await self.db.scalar(
             select(func.count(RequestLog.id)).where(

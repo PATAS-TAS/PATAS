@@ -1,4 +1,9 @@
-from typing import Dict
+"""
+PATAS Classification Pipeline.
+
+Core module for spam classification combining rule-based and ML approaches.
+"""
+from typing import Dict, List, Any
 from app.preprocessing import clean_text
 from app.commercial_patterns import commercial_patterns
 from app.ml_model import ml_model
@@ -11,18 +16,59 @@ logger = logging.getLogger(__name__)
 
 
 class ClassificationPipeline:
-    def __init__(self):
+    """
+    Main classification pipeline for spam detection.
+
+    Combines rule-based pattern matching with ML inference for accurate
+    spam classification. Supports caching and observability tracing.
+
+    Attributes:
+        version: Pipeline version string
+        spam_label_threshold: Score threshold for spam label (default 0.35)
+        api_threshold: Score threshold for API response (default 0.40)
+    """
+
+    def __init__(self) -> None:
         self.version = "0.1.0"
         # thresholds can be hot-reloaded
         self.spam_label_threshold: float = 0.35
         self.api_threshold: float = 0.40
 
     def apply_config(self, spam_label_threshold: float, api_threshold: float) -> None:
+        """
+        Apply configuration values (supports hot-reload).
+
+        Args:
+            spam_label_threshold: Threshold for spam label assignment
+            api_threshold: Threshold for API spam classification
+        """
         self.spam_label_threshold = max(0.0, min(1.0, spam_label_threshold))
         self.api_threshold = max(0.0, min(1.0, api_threshold))
 
     @trace_function(name="pipeline.classify")
-    def classify(self, text: str, lang: str = "en") -> Dict:
+    def classify(self, text: str, lang: str = "en") -> Dict[str, Any]:
+        """
+        Classify text for spam, toxicity, and other labels.
+
+        Uses a hybrid approach:
+        1. Check cache for previous results
+        2. Preprocess text (normalization, cleaning)
+        3. Apply rule-based pattern matching
+        4. Short-circuit if rules are confident, otherwise run ML inference
+        5. Combine scores and generate labels
+
+        Args:
+            text: Input text to classify
+            lang: Language code (default "en")
+
+        Returns:
+            Dict with keys:
+                - spam_score: Float 0.0-1.0
+                - toxicity: Float 0.0-1.0
+                - labels: List of labels ("spam", "scam", "toxic")
+                - reasons: List of matched pattern reasons
+                - version: Pipeline version
+        """
         # Check cache first (fastest path)
         cache_start = time.time()
         cached = classification_cache.get(text, lang)

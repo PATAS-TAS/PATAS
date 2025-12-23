@@ -5,7 +5,7 @@ Tracks LLM API usage, enforces quotas, and sends alerts when budgets are exceede
 """
 import logging
 from typing import Dict, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 from enum import Enum
 from collections import defaultdict
@@ -73,7 +73,7 @@ class CostGuard:
         key = f"{provider}:{model}"
         
         # Track by period
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         daily_key = f"{tenant_id}:{now.date()}"
         weekly_key = f"{tenant_id}:{now.isocalendar()[0]}-W{now.isocalendar()[1]}"
         monthly_key = f"{tenant_id}:{now.year}-{now.month}"
@@ -131,7 +131,7 @@ class CostGuard:
         Returns:
             Current usage in USD
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         if period == BudgetPeriod.DAILY:
             key = f"{tenant_id}:{now.date()}"

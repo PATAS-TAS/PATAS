@@ -7,7 +7,7 @@ with zero-downtime deployment.
 import logging
 import os
 from typing import Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -75,8 +75,8 @@ class SecretRotationService:
             # Store rotation history
             rotation_record = {
                 "secret_type": secret_name,
-                "rotated_at": datetime.utcnow(),
-                "expires_at": datetime.utcnow() + timedelta(hours=self.grace_period_hours),
+                "rotated_at": datetime.now(timezone.utc),
+                "expires_at": datetime.now(timezone.utc) + timedelta(hours=self.grace_period_hours),
                 "old_secret_hash": self._hash_secret(current_secret) if current_secret else None,
                 "new_secret_hash": self._hash_secret(new_secret),
             }
@@ -116,7 +116,7 @@ class SecretRotationService:
         secret_name = secret_type.value
         if secret_name in self._rotation_history:
             record = self._rotation_history[secret_name]
-            if datetime.utcnow() < record["expires_at"]:
+            if datetime.now(timezone.utc) < record["expires_at"]:
                 # Old secret still valid (in real implementation, would retrieve from secure storage)
                 logger.debug(f"Old secret for {secret_name} still in grace period")
         
@@ -130,7 +130,7 @@ class SecretRotationService:
             Number of secrets expired
         """
         expired_count = 0
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         for secret_name, record in list(self._rotation_history.items()):
             if now >= record["expires_at"]:
@@ -160,7 +160,7 @@ class SecretRotationService:
     def get_rotation_status(self) -> Dict[str, Any]:
         """Get status of all secret rotations."""
         status = {}
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         for secret_name, record in self._rotation_history.items():
             status[secret_name] = {
