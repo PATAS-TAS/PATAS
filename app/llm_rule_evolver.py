@@ -7,7 +7,7 @@ import json
 import logging
 from typing import List, Dict, Any, Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.llm_rule_refiner import get_openai_client
 from app.llm_cache import cache_result
@@ -132,7 +132,7 @@ Respond with JSON format:
         
         return {
             "success": True,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "model": "gpt-4o-mini",
             "fp_count": len(false_positives),
             "fn_count": len(false_negatives),
@@ -197,7 +197,7 @@ def save_suggestions(suggestions: Dict[str, Any], output_file: str = "rule_sugge
     
     output_data = {
         "version": "1.0",
-        "last_updated": datetime.utcnow().isoformat(),
+        "last_updated": datetime.now(timezone.utc).isoformat(),
         "suggestions": existing
     }
     

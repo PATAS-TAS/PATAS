@@ -815,8 +815,3 @@ async def analyze_patterns(
     except Exception as e:
         logger.error(f"Error in analyze-patterns: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=safe_error_detail("Pattern analysis", e))
-
-
-# Include v1 router (must be after all route definitions)
-app.include_router(v1_router)
-

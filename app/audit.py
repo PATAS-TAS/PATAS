@@ -5,7 +5,7 @@ Tracks who accessed what and when for security compliance.
 import logging
 import json
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 from app.config import settings
 
@@ -37,7 +37,7 @@ def log_access(
         return
     
     audit_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "resource_type": resource_type,
         "resource_path": str(resource_path),
         "user_id": user_id or "anonymous",
@@ -66,7 +66,7 @@ def cleanup_old_audit_logs(retention_days: int = 90):
     if not AUDIT_LOG_FILE.exists():
         return
     
-    cutoff_date = datetime.utcnow() - timedelta(days=retention_days)
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=retention_days)
     cutoff_str = cutoff_date.isoformat()
     
     try:
@@ -107,7 +107,7 @@ def get_audit_logs(
     if not AUDIT_LOG_FILE.exists():
         return []
     
-    cutoff_date = datetime.utcnow() - timedelta(days=days)
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
     cutoff_str = cutoff_date.isoformat()
     
     results = []

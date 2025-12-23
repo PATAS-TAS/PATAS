@@ -6,7 +6,7 @@ Exports patterns as ruleset JSON for TAS to consume.
 import json
 import re
 from typing import Dict, List, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from app.commercial_patterns import commercial_patterns
 
 
@@ -41,7 +41,7 @@ def export_ruleset(version: str = "0.1.0", description: str = None) -> Dict[str,
     
     ruleset = {
         "version": version,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "description": description or "PATAS commercial spam patterns",
         "rules": rules,
         "metadata": {
