@@ -94,7 +94,7 @@ class RegexPatterns:
                 "Multiple URLs detected",
             ),
             "many_emoji": (
-                re.compile(r"[\U0001F300-\U0001F9FF].*[\U0001F300-\U0001F9FF].*[\U0001F300-\U0001F9FF].*[\U0001F300-\U0001F9FF]", re.UNICODE),
+                re.compile(r"[\U0001F300-\U0001F9FF]", re.UNICODE),
                 "Many emojis (4+)",
             ),
         }
@@ -111,6 +111,10 @@ class RegexPatterns:
             
             matches = pattern.findall(text)
             if matches:
+                # For many_emoji, we just find all emojis. We need at least 4 to trigger.
+                if pattern_name == "many_emoji" and len(matches) < 4:
+                    continue
+
                 match_count = len(matches) if isinstance(matches, list) else 1
                 
                 if pattern_name in ["very_short_message", "few_words_message"]:
@@ -118,8 +122,8 @@ class RegexPatterns:
                 elif pattern_name == "multiple_urls":
                     score = min(0.4 * match_count, 0.9)
                 elif pattern_name == "many_emoji":
-                    emoji_count = len(re.findall(r"[\U0001F300-\U0001F9FF]", text))
-                    score = min(0.2 + (emoji_count * 0.05), 0.8)
+                    # Reuse match_count which is already the count of emojis found
+                    score = min(0.2 + (match_count * 0.05), 0.8)
                 else:
                     score = min(0.35 * match_count, 0.9)
                 
