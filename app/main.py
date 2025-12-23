@@ -42,6 +42,7 @@ from app.observability import (
 )
 from app.deps import get_db as dep_get_db, get_metrics as dep_get_metrics, get_pipeline as dep_get_pipeline, MetricsProvider
 from app.config_manager import get_config_manager
+from app.security_headers import SecurityHeadersMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -238,6 +239,9 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods.split(",") if settings.cors_allow_methods != "*" else ["*"],
     allow_headers=settings.cors_allow_headers.split(",") if settings.cors_allow_headers != "*" else ["*"],
 )
+
+# Add security headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Add latency profiling middleware (replaces simple timing middleware)
 app.add_middleware(LatencyProfilingMiddleware)
