@@ -40,14 +40,18 @@ async def test_stats_repository_log_request():
 async def test_stats_repository_get_stats_24h():
     """Test stats repository get_stats_24h method."""
     db = AsyncMock()
-    db.scalar = AsyncMock(return_value=10)
+    # Mocking single query result
+    mock_result = Mock()
+    mock_result.one = Mock(return_value=(10, 100.0, 5))
+    db.execute = AsyncMock(return_value=mock_result)
     
     repo = StatsRepository(db)
     result = await repo.get_stats_24h()
     
-    assert "req_24h" in result
-    assert "avg_latency_ms" in result
-    assert "error_rate" in result
+    assert result["req_24h"] == 10
+    assert result["avg_latency_ms"] == 100.0
+    # error_rate = error_count (5) / total_reqs (10) = 0.5
+    assert result["error_rate"] == 0.5
 
 
 @pytest.mark.asyncio
