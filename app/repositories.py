@@ -1,6 +1,6 @@
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, func, and_, or_, case
 from datetime import datetime, timedelta, timezone
 from app.models import (
     TrainingExample, RequestLog, APIKey,
@@ -52,34 +52,27 @@ class StatsRepository:
     async def get_stats_24h(self) -> dict:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
-        total_reqs = await self.db.scalar(
-            select(func.count(RequestLog.id)).where(
-                RequestLog.created_at >= cutoff
-            )
+        # Optimize: Combine 3 queries into 1 to reduce DB round-trips
+        stmt = select(
+            func.count(RequestLog.id),
+            func.avg(RequestLog.latency_ms),
+            func.sum(case((RequestLog.status_code >= 400, 1), else_=0))
+        ).where(
+            RequestLog.created_at >= cutoff
         )
 
-        avg_latency = await self.db.scalar(
-            select(func.avg(RequestLog.latency_ms)).where(
-                and_(
-                    RequestLog.created_at >= cutoff,
-                    RequestLog.latency_ms.isnot(None),
-                )
-            )
-        )
+        result = await self.db.execute(stmt)
+        total_reqs, avg_latency, error_count = result.one()
 
-        error_count = await self.db.scalar(
-            select(func.count(RequestLog.id)).where(
-                and_(
-                    RequestLog.created_at >= cutoff,
-                    RequestLog.status_code >= 400,
-                )
-            )
-        )
+        # Handle None results from aggregations
+        total_reqs = total_reqs or 0
+        avg_latency = avg_latency or 0.0
+        error_count = error_count or 0
 
         return {
-            "req_24h": total_reqs or 0,
-            "avg_latency_ms": float(avg_latency or 0.0),
-            "error_rate": (error_count or 0) / max(total_reqs or 1, 1),
+            "req_24h": total_reqs,
+            "avg_latency_ms": float(avg_latency),
+            "error_rate": error_count / max(total_reqs, 1),
         }
 
 
