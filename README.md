@@ -1,49 +1,67 @@
 # PATAS Core
 
-**Pattern-Adaptive Transmodal Anti-Spam System**
+PATAS Core is a pattern-discovery and rule-management system for anti-spam teams reviewing historical message logs.
 
-PATAS is a pattern discovery and rule management system for anti-spam operations. It analyzes historical message logs, discovers spam patterns, generates blocking rules, and evaluates their effectiveness.
+**[Open the live demo](https://patas.app/demo)**
 
----
+[Run locally](#quickstart) · [Examples](examples/) · [Architecture map](app/README.md)
 
-## How PATAS Works
+PATAS analyzes message logs, groups similar spam patterns, generates reviewable blocking rules, and tracks rule evaluation metrics. It is evaluation software for technical review, not a hosted moderation guarantee.
 
-PATAS uses a **two-stage approach** to efficiently process millions of logs:
+## Quickstart
 
-1. **Fast Scanning** (Stage 1): Processes all messages with deterministic patterns (URLs, phone numbers, keywords). This is fast and catches obvious spam cases.
+Python 3.10 and Poetry are required.
 
-2. **Deep Analysis** (Stage 2): Only suspicious patterns from Stage 1 get expensive semantic analysis and AI treatment. This reduces API costs by 70-90% while maintaining high-quality pattern discovery.
+```bash
+poetry install
+cp .env.example .env
+poetry run patas --help
+```
 
-The system discovers patterns by meaning (not just keywords), groups similar messages using DBSCAN clustering, and generates transparent SQL rules with precision/recall metrics.
+The repository also includes Docker and monitoring examples for local review:
 
----
+```bash
+docker compose -f docker-compose.monitoring.yml up
+```
 
-## Try It Out
+These setup commands depend on the full Python/Poetry environment and were not re-run as part of this README pass.
 
-**Live Demo**: [https://patas.app/demo](https://patas.app/demo)
+## How it works
 
----
+PATAS uses a two-stage workflow:
+
+1. Fast scanning identifies obvious or suspicious candidates with deterministic signals.
+2. Deeper semantic/LLM-assisted analysis is reserved for the suspicious subset and produces reviewable rule candidates.
+
+Generated rules stay inspectable. The code includes SQL safety validation, shadow evaluation, promotion thresholds, precision/recall tracking, rollback paths, and rule export surfaces.
+
+## What is in this repo
+
+- `app/` - FastAPI app, pattern mining, rule lifecycle, evaluation, safety, and observability modules.
+- `integration/` - integration adapters and CLI surfaces.
+- `examples/` - PoC scripts, sample Telegram logs, and usage examples.
+- `scripts/` - analysis, migration, benchmarking, deployment, and operational helper scripts.
+- `grafana/`, `prometheus.yml`, `alerts.yml` - monitoring examples.
+- `legacy/` - preserved v1 pattern analyzer code.
+
+## Evaluation scope
+
+Use PATAS when you want to review anti-spam patterns against your own labeled data and promote rules only after measurement.
+
+Do not treat the included thresholds or sample outputs as universal production performance. Precision, recall, coverage, and cost depend on the source data, labels, profile, and deployment path.
 
 ## Documentation
 
-Complete documentation is available in the [Wiki](https://github.com/kiku-jw/PATAS/wiki).
+- [Application map](app/README.md)
+- [Usage examples](examples/USAGE_EXAMPLES.md)
+- [Integration notes](integration/README.md)
+- [Scripts guide](scripts/README.md)
+- [Legacy notes](legacy/README.md)
 
-**Essential for developers:**
-- **[Quick Start Guide](https://github.com/kiku-jw/PATAS/wiki/Quick-Start)** - Installation, configuration, and basic usage
-- **[FAQ](https://github.com/kiku-jw/PATAS/wiki/FAQ)** - Frequently asked questions
-- **[Product PRD](https://github.com/kiku-jw/PATAS/wiki/Product-PRD)** - Complete Product Requirements Document
-- **[Architecture](https://github.com/kiku-jw/PATAS/wiki/Architecture)** - System design and components
-- **[API Reference](https://github.com/kiku-jw/PATAS/wiki/API-Reference)** - Complete API endpoint documentation
-- **[Production Deployment Guide](https://github.com/kiku-jw/PATAS/wiki/Production-Deployment-Guide)** - Production deployment and maintenance
-
----
-
-## Legal Notice
+## Legal notice
 
 Code is provided for evaluation and technical review. Any production use or long-term deployment may require a separate written agreement depending on your use case.
 
----
-
 ## License
 
-AGPL-3.0. Copyright (c) 2025 KikuAI Lab
+AGPL-3.0. See [LICENSE](LICENSE).
