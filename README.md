@@ -4,7 +4,13 @@ PATAS Core is a pattern-discovery and rule-management system for anti-spam teams
 
 **[Open the live demo](https://patas.app/demo)**
 
-[Run locally](#quickstart) · [Examples](examples/) · [Architecture map](app/README.md)
+[Docs](#documentation) · [Examples](examples/) · [Architecture map](app/README.md)
+
+Sample output:
+
+```text
+Pattern group -> reviewable rule candidate -> evaluation metrics
+```
 
 PATAS analyzes message logs, groups similar spam patterns, generates reviewable blocking rules, and tracks rule evaluation metrics. It is evaluation software for technical review, not a hosted moderation guarantee.
 
