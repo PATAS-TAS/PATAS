@@ -19,27 +19,17 @@ that it is authorized to share and PATAS is authorized to process.
 
 # Evidence
 
-- Current platform documentation confirms cheap or bundled per-item spam
-  detection, rule editors, export paths, commodity DIY ingredients, and a
-  plausible notebook substitute threat.
-- Public operator reports confirm recurring campaign, queue, edit, and
-  AI-written spam shapes, but not current pain or willingness to pay.
-- Adjacent fraud products offer historical-data-to-explainable-rule workflows;
-  no exact PATAS contract or forum demand was confirmed in the bounded search.
-- The research contract defines independent cheap baselines, semantic uplift
-  tests, hard legitimate counterexamples, temporal replay, a typed rule DSL,
-  differential compiler checks, and explicit market/technical kill criteria.
-- A fresh adversarial pass corrected build-first sequencing, data-rights
-  language, stale price units, pseudoprecise segment scores, and an internally
-  inconsistent founding-pilot scope before publication.
+- Current platform documentation confirms cheap or bundled per-item spam detection, rule editors, export paths, commodity DIY ingredients, and a plausible notebook substitute threat.
+- Public operator reports confirm recurring campaign, queue, edit, and AI-written spam shapes, but not current pain or willingness to pay.
+- Adjacent fraud products offer historical-data-to-explainable-rule workflows; no exact PATAS contract or forum demand was confirmed in the bounded search.
+- The research contract defines cheap baselines, semantic uplift tests, legitimate counterexamples, temporal replay, typed rules, compiler checks, and market/technical kills.
+- A fresh adversarial pass corrected build-first sequencing, data-rights language, price units, pseudoprecise scores, and the inconsistent founding-pilot scope.
 
 # Remaining
 
-- Verify current pain and data readiness with qualified operators.
-- Make five concrete paid founding-pilot offers under the frozen PostgreSQL
-  adapter contract.
-- Either obtain one paid commitment plus usable authorized data or fire the
-  documented cohort kill criteria.
+Current pain and data readiness still need operator verification. Make five
+paid founding-pilot offers under the frozen PostgreSQL adapter, then either
+obtain one paid commitment plus usable authorized data or fire the cohort kill.
 
 # Next trigger
 
