@@ -11,6 +11,9 @@ project knowledge. It follows Google's Open Knowledge Format v0.1.
 
 - [Verified completions](completions/) - sparse receipts for material verified
   outcomes that may change cross-project state.
+- [PATAS Core v3 brief](../docs/v3/BRIEF.md) - benchmark-first product and
+  architecture direction, current v2 audit, research questions, and migration
+  gates.
 
 GitHub Issues remain the task queue. Source code, tests, runtime evidence, and
 project-specific documentation remain the implementation truth.
