@@ -28,6 +28,7 @@ not the market category.
 - [Competitors, workarounds, and category boundary](COMPETITION.md)
 - [Core, benchmark, methods, and adjacent use cases](CORE-AND-BENCHMARK.md)
 - [Synthesis, anti-slop review, and next validation cycle](DECISION.md)
+- [First-customer outreach roster and exact copy](OUTREACH-TARGETS.md)
 
 ## Evidence labels
 
