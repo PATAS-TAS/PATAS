@@ -18,3 +18,6 @@ here.
   unverified claims.
 - The product agent writes the receipt. A separate collector owns external HQ
   and GitHub Project updates; workers must not perform competing writebacks.
+- When the collector reports unreviewed writeback drift, the coordinator
+  inspects the exact published range and resolves it as a real completion or
+  acknowledges it as routine. Nick is not the reminder for this loop.
