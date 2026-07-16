@@ -1,6 +1,6 @@
 # PATAS Core v3 Brief
 
-Status: research and benchmark definition
+Status: customer validation and benchmark definition
 
 Owner issue: [#8](https://github.com/PATAS-TAS/PATAS/issues/8)
 
@@ -36,11 +36,39 @@ The core product promise is:
 > legitimate messages are dangerously close, and which bounded rule is worth
 > testing in shadow mode.
 
+## Commercial sequencing update (2026-07-17)
+
+The market, competitor, economic, data-access, and technical research is now
+recorded in the [v3 research pack](research/README.md). It changes the order of
+work without weakening the benchmark contract:
+
+- **Conditional GO** for a bounded paid-customer and authorized-data validation.
+- **NO-GO** for implementing a new v3 runtime before a qualified operator makes
+  a paid commitment and can lawfully provide both abuse and legitimate history.
+- A disposable public-data mechanics smoke is allowed only when it directly
+  reduces pilot risk; it must not grow into a product build or be reported as
+  market proof.
+- The benchmark below becomes the acceptance contract for a real pilot. It is
+  not permission to build in anticipation of one.
+
+The first buyer hypothesis is a company-backed UGC or support operation with
+paid operators, recurring cross-message campaigns, at least 50 suspicious
+events per day or five staff-hours per week, an authorized export, and an
+existing PostgreSQL-backed review or control surface. Self-hosted Discourse is
+an accessible research/export path, but its Data Explorer is read-only and does
+not by itself satisfy the deployment gate. These thresholds are validation
+hypotheses, not confirmed demand.
+
+The externally sold wedge is a historical spam campaign audit. The broader
+semantic-pattern engine remains an internal reuse hypothesis until multiple
+customers share the same evidence, control, and replay contract.
+
 ## Product boundaries
 
 ### In scope
 
-- Buyer-owned, synthetic, sanitized, or otherwise rights-cleared exports.
+- Exports the provider is authorized to share and PATAS is authorized to
+  process; provenance, processing authority, and de-identification are separate.
 - Exact, near-duplicate, entity, lexical, and semantic campaign discovery.
 - Representative evidence, counterexamples, cluster quality, and rule risk.
 - Human-reviewed SQL-like or structured rule candidates.
@@ -302,8 +330,9 @@ least one of:
 Legitimate near-neighbors are required. A benchmark containing only spam is
 not acceptable for rule promotion.
 
-Use buyer-owned, synthetic, sanitized, or rights-cleared data only. Never copy
-the archived Telegram contractor corpus into the public benchmark.
+Use only data whose sharing and processing are authorized. Buyer possession,
+public availability, or sanitization alone is insufficient. Never copy the
+archived Telegram contractor corpus into the public benchmark.
 
 ### Baselines
 
@@ -361,9 +390,23 @@ experiments where possible:
 7. Which minimum DSL covers the rules customers actually need without turning
    PATAS into a database-specific code generator?
 8. Which hosted retention and isolation contract is acceptable for first
-   testers with buyer-owned exports?
+   testers with explicitly authorized exports?
 
 ## Execution plan
+
+### Commercial gate: qualify, obtain data rights, and test payment
+
+- Qualify operators on current queue volume, staff time, recurring campaign
+  shape, existing tools, false-positive cost, export rights, and rule surface.
+- Require both reviewed abuse and representative legitimate history.
+- Make a concrete fixed-price pilot offer; interviews and free data do not
+  satisfy the money gate.
+- Exclude production credentials, live enforcement, custom dashboards, and
+  customer-specific moderation outsourcing.
+
+Exit: one qualified operator makes a paid commitment for the bounded
+authorized-data audit and passes data fit. Until then, Phases 0-5 below are a
+design and acceptance contract, not an authorized implementation sequence.
 
 ### Phase 0: reproduce and freeze the baseline
 
@@ -376,7 +419,7 @@ Exit: one command runs every baseline on one immutable dataset split.
 
 ### Phase 1: dataset and annotation contract
 
-- Inventory only rights-cleared candidate data.
+- Inventory only candidate data with documented sharing and processing authority.
 - Define the canonical row and campaign annotation schemas.
 - Build a small gold set with diverse languages, paraphrases, obfuscation,
   shared URLs, and hard legitimate near-neighbors.
@@ -437,8 +480,9 @@ Exit: one documented v3 path replaces the overlapping runtime entry points.
   understandable without a call.
 - Use the existing account/payment surfaces rather than rebuilding them.
 
-Exit: at least three testers complete owned-data audits, two return for a
-second API session, and one report or rule saves review time.
+Exit: at least three qualified customers complete authorized-data audits through a
+mostly unchanged pipeline, at least one purchases or explicitly requests a
+second audit, and one accepted report or control measurably saves review time.
 
 ## Repository strategy
 
@@ -460,7 +504,7 @@ exists.
 
 | Risk | Control |
 | --- | --- |
-| Synthetic benchmark is too easy | Include rights-cleared real structure and hard ham near-neighbors. |
+| Synthetic benchmark is too easy | Include authorized real structure and hard ham near-neighbors. |
 | LLM produces plausible but unsupported rules | Typed schema, cited row IDs, deterministic compiler, held-out evaluation. |
 | Embeddings merge generic commercial language | Nearest-ham retrieval, cluster purity, entity provenance, temporal tests. |
 | Multilingual campaigns fragment | Multilingual benchmark slices and model comparison on the same splits. |
@@ -483,17 +527,22 @@ exists.
 ## First session for the next agent
 
 1. Read this brief, repository `AGENTS.md`, `knowledge/index.md`, and Issue #8.
-2. Verify the current revisions and rerun the compile-only baseline check.
-3. Inspect the actual data rights and available campaign labels without opening
-   private raw data unnecessarily.
-4. Draft the benchmark schema, immutable split strategy, and metric formulas.
-5. Produce a research matrix for multilingual embedding and clustering
-   candidates, including hardware, license, privacy, and reproducibility.
-6. Return a benchmark-first implementation plan for approval before creating
-   the v3 package.
+2. Read the [research decision](research/DECISION.md) and qualify current
+   operators against its pain, data, money, and native-tool gates.
+3. Verify current pain before treating any historical public complaint as a
+   prospect.
+4. Make the bounded paid offer only after the buyer, data rights, and export
+   shape are clear.
+5. If a buyer makes a paid commitment and passes the authorized-data gate,
+   instantiate the benchmark schema, immutable split, metrics, and minimum
+   baseline runner against that approved pilot contract.
+6. Return to owner review before adding the v3 package, hosted service, or
+   customer-specific integration.
 
-The first code change should be a dataset/benchmark contract or a minimal
-offline baseline harness. It should not be a web service.
+Before the commercial gate, the first durable change should be validation
+evidence, not product code. After the gate, the first code change should be the
+dataset/benchmark contract or a minimal offline baseline harness. It should not
+be a web service.
 
 ## References
 
