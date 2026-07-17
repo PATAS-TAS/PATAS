@@ -1,6 +1,8 @@
 # PATAS first-customer outreach roster
 
-Status: activation started; 2 of 20 first touches confirmed sent on 2026-07-17
+Status: activation in progress; 4 of 20 first touches sent — 2 on 2026-07-17
+and 2 on 2026-07-18. The two email entries are confirmed only as accepted
+into Gmail Sent; delivery, reading, and recipient interest remain unknown.
 
 Research date: 2026-07-17
 
@@ -36,12 +38,12 @@ first message. Send no more than one follow-up after silence.
 | --- | --- | --- | --- | --- |
 | 1 | Richard at Communiteq | [Official contact form](https://www.communiteq.com/contact/) | One reusable Discourse path could reach several permissioned customers. | Channel discovery |
 | 2 | Bart Veldhuizen, n8n Community Lead | [Professional LinkedIn](https://nl.linkedin.com/in/bartveldhuizen) | A commercial company's growing community has fresh AI-reply abuse evidence, added its first moderator, and plans more coverage. | B-tier currentness probe |
-| 3 | PistonHeads Forum Team | `info@pistonheads.com` | Current public controls explicitly exist because moderation is thin overnight. | B-tier currentness probe |
-| 4 | MSE Forum Team | `forumteam@moneysavingexpert.com` via the [company contact directory](https://www.moneysavingexpert.com/site/site-contacts/) | A company-backed, extremely busy forum has a dedicated team and a current manual spam-busting workflow. | B-tier currentness probe |
+| 3 | PistonHeads Forum Team | `info@pistonheads.com` | Current public controls explicitly exist because moderation is thin overnight. | B-tier currentness probe; sent 2026-07-18 |
+| 4 | MSE Forum Team | `forumteam@moneysavingexpert.com` via the [company contact directory](https://www.moneysavingexpert.com/site/site-contacts/) | A company-backed, extremely busy forum has a dedicated team and a current manual spam-busting workflow. | B-tier currentness probe; sent 2026-07-18 |
 | 5 | Jim Brandt, Best Practical | Address to Jim via `sales@bestpractical.com` | Named admin, real company, Discourse/PostgreSQL, and a precise human/AI reputation-farming incident. | B-tier currentness probe |
 | 6 | David Capello, Aseprite / Igara | [Professional LinkedIn](https://ar.linkedin.com/in/davidcapello); `support@aseprite.org` fallback | Named founder reported edit-after-approval variants bypassing Watched Words. | B/C-tier currentness probe |
 | 7 | Angus McLeod at Pavilion | [Official contact form](https://pavilion.tech/) | Discourse implementation partner who can test whether the deployment gap is reusable. | Channel discovery |
-| 8 | Robert / gVectors wpForo product team | `info@gvectors.com` or [business contact form](https://gvectors.com/contact-us/) | A forum-platform vendor had a fresh hundred-topic attack and now ships native AI controls. | Platform boundary/channel probe |
+| 8 | Robert / gVectors wpForo product team | `info@gvectors.com` or [business contact form](https://gvectors.com/contact-us/) | A forum-platform vendor had a fresh hundred-topic attack and now ships native AI controls. | Platform boundary/channel probe; sent 2026-07-17 |
 | 9 | RFJ and wayne, IDM Forums admins | No permitted business channel verified | Small design-partner candidate with recent hands-on spam handling, but forum solicitation is prohibited. | Research only; do not contact |
 | 10 | Hugo Gameiro, Masto.host | `info@masto.host` | PostgreSQL-native managed communities; useful channel test beyond Discourse. | Channel interview only |
 | 11 | David, ControlBooth founder | [Official contact form](https://www.controlbooth.com/misc/contact) | Non-Discourse counterexample with a public whack-a-mole incident. | Interview only; no pilot offer |
@@ -112,7 +114,7 @@ Sources: [January automated-reply incident](https://community.n8n.io/t/uploading
 
 ### 3. PistonHeads — Forum Team
 
-**Send to:** `info@pistonheads.com`
+**Sent to:** `info@pistonheads.com` on 2026-07-18
 
 **Subject:** PistonHeads forum spam workload
 
@@ -135,7 +137,7 @@ Sources: [current forum restriction](https://www.pistonheads.com/faq/forum-faq),
 
 ### 4. MoneySavingExpert — MSE Forum Team
 
-**Send to:** `forumteam@moneysavingexpert.com`
+**Sent to:** `forumteam@moneysavingexpert.com` on 2026-07-18
 
 **Subject:** MSE recurring spam workload
 
@@ -224,9 +226,8 @@ Source: [Pavilion team, clients, and contact](https://pavilion.tech/).
 
 ### 8. wpForo / gVectors — Robert and product team
 
-**Send to:** `info@gvectors.com` or the
-[official business contact form](https://gvectors.com/contact-us/), addressed
-to Robert / the wpForo product team
+**Sent via:** [official business contact form](https://gvectors.com/contact-us/)
+on 2026-07-17, addressed to Robert / the wpForo product team
 
 **Subject:** wpForo historical spam-rule gap
 
