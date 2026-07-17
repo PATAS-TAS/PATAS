@@ -6,6 +6,10 @@ Research date: 2026-07-17
 
 Owner issue: [#8](https://github.com/PATAS-TAS/PATAS/issues/8)
 
+Reply handling, the minimal paid path, design-partner boundaries, and sender
+configuration are defined in the
+[outreach response playbook](OUTREACH-RESPONSE-PLAYBOOK.md).
+
 ## Bottom line
 
 There is no publicly verified prospect who should receive the $500 offer now.

@@ -29,6 +29,7 @@ not the market category.
 - [Core, benchmark, methods, and adjacent use cases](CORE-AND-BENCHMARK.md)
 - [Synthesis, anti-slop review, and next validation cycle](DECISION.md)
 - [First-customer outreach roster and exact copy](OUTREACH-TARGETS.md)
+- [Reply handling, paid design-partner contract, and sender rules](OUTREACH-RESPONSE-PLAYBOOK.md)
 
 ## Evidence labels
 
