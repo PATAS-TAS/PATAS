@@ -1,6 +1,6 @@
 # PATAS first-customer outreach roster
 
-Status: copy prepared; no message sent
+Status: activation started; 2 of 20 first touches confirmed sent on 2026-07-17
 
 Research date: 2026-07-17
 
@@ -46,9 +46,12 @@ first message. Send no more than one follow-up after silence.
 | 10 | Hugo Gameiro, Masto.host | `info@masto.host` | PostgreSQL-native managed communities; useful channel test beyond Discourse. | Channel interview only |
 | 11 | David, ControlBooth founder | [Official contact form](https://www.controlbooth.com/misc/contact) | Non-Discourse counterexample with a public whack-a-mole incident. | Interview only; no pilot offer |
 | 12 | Guido Leenders, Invantive | `sales@invantive.eu` | SQL-literate commercial operator and adjacent multilingual support-quality case. | Boundary interview only |
+| 13 | NodeBB team | [Official contact form](https://nodebb.org/contact) | A forum-platform and managed-hosting vendor can directly falsify whether the historical campaign-to-rule gap survives bundled controls or is cheaper to build in-house. | Platform boundary/channel probe; sent 2026-07-17 |
 
-The first eight are the actual first wave. Rows 9-12 should be used only if the
-first wave does not produce enough qualified conversations or if a specific
+Rows 1-8 were the prepared first wave. NodeBB was added as a channel-safe
+platform-boundary substitute when Gmail required reauthentication and the n8n
+LinkedIn route required a paid subscription. Rows 9-12 should be used only if
+the first wave does not produce enough qualified conversations or if a specific
 boundary needs testing.
 
 ## Exact first-touch messages
@@ -244,6 +247,32 @@ adapter, or pitch against their native AI before that proof.
 Sources: [December 2025 attack](https://wpforo.com/community/general-discussions/spam-attack-2/),
 [wpForo 3 AI controls](https://wpforo.com/community/faq/how-to-stop-spam/),
 [gVectors contact](https://gvectors.com/contact-us/).
+
+### 13. NodeBB — product and hosting team
+
+**Sent via:** [official contact form](https://nodebb.org/contact) on 2026-07-17
+
+```text
+Hi NodeBB team — I saw Spam-Be-Gone is bundled, while operators still ask how to combine its controls. I’m validating PATAS: an offline audit that groups recurring campaigns in historical abuse reports and tests candidate rules against legitimate history. Is historical campaign-to-rule discovery still a gap for hosted NodeBB operators, or already covered well enough? A one-line answer is enough; no integration pitch.
+
+Nick Dudnichenko — PATAS
+https://patas.app
+If irrelevant, I won’t follow up.
+```
+
+**Why this recipient:** NodeBB both develops the forum platform and sells
+managed hosting and enterprise work. It bundles Spam-Be-Gone, and the public
+support record contains operator questions about combining the available
+controls. A negative answer is valuable: this is a direct build-versus-buy and
+native-substitute test, not a request for custom development.
+
+**Advance only if:** the team confirms that multiple hosted operators retain a
+campaign-level gap after current controls. Do not offer a NodeBB adapter or
+white-label work before a qualified end-user buyer exists.
+
+Sources: [NodeBB product and hosting](https://nodebb.org/),
+[official contact form](https://nodebb.org/contact),
+[Spam-Be-Gone operator question](https://community.nodebb.org/topic/16163/best-practices-on-stopping-spam-need-advice-on-spam-be-gone-options).
 
 ## Second-wave boundary interviews
 
