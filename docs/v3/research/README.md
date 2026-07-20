@@ -1,6 +1,7 @@
 # PATAS v3 research pack
 
-Status: desk research complete; buyer validation not complete
+Status: desk research complete; bounded outreach active; buyer validation not
+complete
 
 Research date: 2026-07-17
 
@@ -30,6 +31,7 @@ not the market category.
 - [GitHub tool landscape and dependency decisions](GITHUB-LANDSCAPE.md)
 - [Synthesis, anti-slop review, and next validation cycle](DECISION.md)
 - [First-customer outreach roster and exact copy](OUTREACH-TARGETS.md)
+- [Thirty-account trigger cohort and ranked activation queue](PROSPECT-COHORT-30.md)
 - [Reply handling, paid design-partner contract, and sender rules](OUTREACH-RESPONSE-PLAYBOOK.md)
 
 ## Evidence labels
@@ -56,6 +58,10 @@ processing rights. Provenance, processing authority, de-identification,
 purpose, retention, and deletion are recorded separately. Contract-era
 Telegram data, labels, patterns, screenshots, rules, and derivative work
 product are excluded. No outreach was sent during this research.
+
+Outreach started only after this research phase. Its current state is recorded
+in the trigger cohort rather than retroactively treating public cases as
+buyers.
 
 ## What is not yet proven
 

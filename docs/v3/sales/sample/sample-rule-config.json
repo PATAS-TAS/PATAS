@@ -1,0 +1,10 @@
+{
+  "artifact_status": "synthetic_sales_example",
+  "rule_id": "wallet-recovery-campaign-v1",
+  "text_pattern": "(recover(?:ed|y)?(?: [a-z]+){0,2} (?:funds|wallet|losses)|recovery specialist|wallet recovery)",
+  "maximum_account_age_days": 7,
+  "minimum_external_contact_count": 1,
+  "minimum_distinct_threads_24h": 3,
+  "target_dialect": "postgresql",
+  "evaluation_split": "holdout"
+}

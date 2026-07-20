@@ -1,6 +1,7 @@
 # PATAS outreach response and paid design-partner playbook
 
-Status: prepared; no external message sent
+Status: active; 4 first touches sent, 2 automated acknowledgements, 0 human
+replies, 0 qualified prospects, and 0 paid offers as of 2026-07-20
 
 Research date: 2026-07-17
 
@@ -187,6 +188,12 @@ authenticated human Gmail account, with the display name `Nick Dudnichenko —
 PATAS`. Use the same Gmail address for `From` and replies. Do not republish the
 personal address in this public playbook and do not spoof `support@patas.app`
 through Gmail's alias feature.
+
+Live connector inspection on 2026-07-20 confirmed mailbox access but found that
+the account's current sender display name does not match the required founder
+identity. Do not send another cold email from that account until the display
+name is corrected and a self-test confirms the visible `From` identity. This is
+an identity/trust gate, not a reason to rotate mailboxes.
 
 This is a first-wave decision, not the desired permanent brand mailbox. The
 long-term address should be a real human mailbox such as `nick@patas.app` on a

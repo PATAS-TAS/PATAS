@@ -100,8 +100,10 @@ check before it is treated as a prospect.
 
 ## Public cases worth qualifying
 
-No outreach has been sent. These are public evidence cases, not endorsements or
-confirmed buyers.
+These cases began as desk-research inputs. Some were later used in bounded
+currentness probes, but none is an endorsement, a confirmed buyer, or a
+qualified pilot prospect. Current contact state lives in
+[the activation cohort](PROSPECT-COHORT-30.md).
 
 | Case | Why it is useful | Source status | Main unknown |
 | --- | --- | --- | --- |
