@@ -27,6 +27,7 @@ not the market category.
 - [Market, buyers, economics, and data access](MARKET.md)
 - [Competitors, workarounds, and category boundary](COMPETITION.md)
 - [Core, benchmark, methods, and adjacent use cases](CORE-AND-BENCHMARK.md)
+- [GitHub tool landscape and dependency decisions](GITHUB-LANDSCAPE.md)
 - [Synthesis, anti-slop review, and next validation cycle](DECISION.md)
 - [First-customer outreach roster and exact copy](OUTREACH-TARGETS.md)
 - [Reply handling, paid design-partner contract, and sender rules](OUTREACH-RESPONSE-PLAYBOOK.md)
