@@ -1,8 +1,9 @@
 # PATAS first-customer outreach roster
 
-Status: activation in progress; 4 of 20 first touches sent — 2 on 2026-07-17
-and 2 on 2026-07-18. The two email entries are confirmed only as accepted
-into Gmail Sent; delivery, reading, and recipient interest remain unknown.
+Status: activation in progress; 5 of 20 first touches sent — 2 on 2026-07-17,
+2 on 2026-07-18, and 1 on 2026-07-20. The three email entries are confirmed
+only as accepted into Gmail Sent; delivery, reading, and recipient interest
+remain unknown.
 
 Initial research date: 2026-07-17; current ranking is maintained in the
 [thirty-account trigger cohort](PROSPECT-COHORT-30.md)
@@ -43,7 +44,7 @@ first message. Send no more than one follow-up after silence.
 | 4 | MSE Forum Team | `forumteam@moneysavingexpert.com` via the [company contact directory](https://www.moneysavingexpert.com/site/site-contacts/) | A company-backed, extremely busy forum has a dedicated team and a current manual spam-busting workflow. | B-tier currentness probe; sent 2026-07-18 |
 | 5 | Jim Brandt, Best Practical | Address to Jim via `sales@bestpractical.com` | Named admin, real company, Discourse/PostgreSQL, and a precise human/AI reputation-farming incident. | B-tier currentness probe |
 | 6 | David Capello, Aseprite / Igara | [Professional LinkedIn](https://ar.linkedin.com/in/davidcapello); `support@aseprite.org` fallback | Named founder reported edit-after-approval variants bypassing Watched Words. | B/C-tier currentness probe |
-| 7 | Angus McLeod at Pavilion | `contact@pavilion.tech` from the [official company site](https://pavilion.tech/) | Discourse implementation partner who can test whether the deployment gap is reusable. | Channel discovery |
+| 7 | Angus McLeod at Pavilion | `contact@pavilion.tech` from the [official company site](https://pavilion.tech/) | Discourse implementation partner who can test whether the deployment gap is reusable. | Channel discovery; sent 2026-07-20 |
 | 8 | Robert / gVectors wpForo product team | `info@gvectors.com` or [business contact form](https://gvectors.com/contact-us/) | A forum-platform vendor had a fresh hundred-topic attack and now ships native AI controls. | Platform boundary/channel probe; sent 2026-07-17 |
 | 9 | RFJ and wayne, IDM Forums admins | No permitted business channel verified | Small design-partner candidate with recent hands-on spam handling, but forum solicitation is prohibited. | Research only; do not contact |
 | 10 | Hugo Gameiro, Masto.host | `info@masto.host` | PostgreSQL-native managed communities; useful channel test beyond Discourse. | Channel interview only |
@@ -408,5 +409,6 @@ data shape, processing authority, budget owner, and next status. Do not collect
 spam text, usernames, IP addresses, or customer data during qualification.
 
 No external message was sent while preparing the initial roster. Nick
-authorized execution of the bounded plan on 2026-07-20; the channel, identity,
+authorized execution of the bounded plan on 2026-07-20; five first touches are
+now recorded, including the Pavilion channel probe. The channel, identity,
 legal, rate, qualification, and one-follow-up gates still apply.

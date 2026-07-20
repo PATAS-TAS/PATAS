@@ -23,7 +23,7 @@ Current funnel:
 ```text
 30 researched accounts
 12 activation targets
-4 first touches sent
+5 first touches sent
 2 automated acknowledgements
 0 human replies
 0 qualified prospects
@@ -31,14 +31,15 @@ Current funnel:
 0 paid pilots
 ```
 
-Gmail inspection on 2026-07-20 independently confirmed both sent messages and
-the two automated acknowledgements. No matching reply from gVectors or NodeBB
+Gmail inspection on 2026-07-20 independently confirmed the two sent end-user
+emails and the two automated acknowledgements. No matching reply from gVectors or NodeBB
 was found in the connected mailbox. A same-day self-test then confirmed from
 the raw MIME header that the visible sender name still fails the identity gate
 in the response playbook. Pavilion's official `contact@pavilion.tech` route was
-verified and a plain-text Gmail draft was prepared, but not sent. Communiteq's
-official form still requires a controllable browser session. Neither channel
-probe is recorded as sent.
+verified and the single plain-text channel probe was sent from the authenticated
+Gmail account on 2026-07-20 with Nick's full PATAS signature and an explicit
+no-follow-up opt-out. Communiteq's official form still requires a controllable
+browser session.
 
 ## Scoring contract
 
@@ -71,7 +72,7 @@ and a budget owner.
 | 9 | Aseprite / Igara | End user | 1/1/2/1/2/2 | 9 | Founder reported posts edited after approval to bypass Watched Words. | Professional route identified; not sent | Verify country-specific outreach rules, then send the existing one-question currentness probe. |
 | 10 | BleepingComputer | End user boundary | 2/1/0/2/2/1 | 8 | An admin reported removing 30+ spammers and 40+ posts in one day amid a daily stream. | Official general/product-evaluation form | Ask only whether the workload remains material; disqualify if a non-PostgreSQL adapter would be required. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
-| 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Official email verified; Gmail draft prepared 2026-07-20; not sent | Send only after the visible Gmail sender identity passes its self-test. Do not commission a plugin before a buyer pays. |
+| 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Sent 2026-07-20 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-27, and do not commission a plugin before a buyer pays. |
 
 ### Evidence for new activation targets
 
