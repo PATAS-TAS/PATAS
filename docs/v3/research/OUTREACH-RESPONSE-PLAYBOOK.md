@@ -1,7 +1,8 @@
 # PATAS outreach response and paid design-partner playbook
 
-Status: active; 5 first touches sent, 2 automated acknowledgements, 0 human
-replies, 0 qualified prospects, and 0 paid offers as of 2026-07-20
+Status: active; 5 first touches sent, 2 automated acknowledgements, 1 human
+platform-boundary reply, 0 qualified prospects, and 0 paid offers as of
+2026-07-20
 
 Research date: 2026-07-17
 

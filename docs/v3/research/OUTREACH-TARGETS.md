@@ -3,7 +3,8 @@
 Status: activation in progress; 5 of 20 first touches sent — 2 on 2026-07-17,
 2 on 2026-07-18, and 1 on 2026-07-20. The three email entries are confirmed
 only as accepted into Gmail Sent; delivery, reading, and recipient interest
-remain unknown.
+remain unknown. One platform vendor has since returned a substantive boundary
+answer; it does not qualify an end-user buyer.
 
 Initial research date: 2026-07-17; current ranking is maintained in the
 [thirty-account trigger cohort](PROSPECT-COHORT-30.md)
@@ -45,7 +46,7 @@ first message. Send no more than one follow-up after silence.
 | 5 | Jim Brandt, Best Practical | Address to Jim via `sales@bestpractical.com` | Named admin, real company, Discourse/PostgreSQL, and a precise human/AI reputation-farming incident. | B-tier currentness probe |
 | 6 | David Capello, Aseprite / Igara | [Professional LinkedIn](https://ar.linkedin.com/in/davidcapello); `support@aseprite.org` fallback | Named founder reported edit-after-approval variants bypassing Watched Words. | B/C-tier currentness probe |
 | 7 | Angus McLeod at Pavilion | `contact@pavilion.tech` from the [official company site](https://pavilion.tech/) | Discourse implementation partner who can test whether the deployment gap is reusable. | Channel discovery; sent 2026-07-20 |
-| 8 | Robert / gVectors wpForo product team | `info@gvectors.com` or [business contact form](https://gvectors.com/contact-us/) | A forum-platform vendor had a fresh hundred-topic attack and now ships native AI controls. | Platform boundary/channel probe; sent 2026-07-17 |
+| 8 | Robert / gVectors wpForo product team | `info@gvectors.com` or [business contact form](https://gvectors.com/contact-us/) | A forum-platform vendor had a fresh hundred-topic attack and now ships native AI controls. | Human platform-boundary reply received; not buyer-qualified |
 | 9 | RFJ and wayne, IDM Forums admins | No permitted business channel verified | Small design-partner candidate with recent hands-on spam handling, but forum solicitation is prohibited. | Research only; do not contact |
 | 10 | Hugo Gameiro, Masto.host | `info@masto.host` | PostgreSQL-native managed communities; useful channel test beyond Discourse. | Channel interview only |
 | 11 | David, ControlBooth founder | [Official contact form](https://www.controlbooth.com/misc/contact) | Non-Discourse counterexample with a public whack-a-mole incident. | Interview only; no pilot offer |
@@ -247,6 +248,12 @@ decision.
 **Advance only if:** gVectors confirms a remaining campaign-level job across
 several wpForo operators. Do not start with white-labeling, build a MySQL
 adapter, or pitch against their native AI before that proof.
+
+**Observed outcome:** a human reply classifies offline historical
+campaign-to-rule analysis as a separate layer from wpForo's native real-time
+controls. It does not establish recurring customer workload, a reusable
+PostgreSQL path, data authority, budget, or buying intent. Keep this as
+product-boundary evidence and do not send the silence follow-up.
 
 Sources: [December 2025 attack](https://wpforo.com/community/general-discussions/spam-attack-2/),
 [wpForo 3 AI controls](https://wpforo.com/community/faq/how-to-stop-spam/),

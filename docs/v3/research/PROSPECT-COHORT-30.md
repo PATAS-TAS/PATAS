@@ -25,15 +25,17 @@ Current funnel:
 12 activation targets
 5 first touches sent
 2 automated acknowledgements
-0 human replies
+1 human platform-boundary reply
 0 qualified prospects
 0 fixed paid offers
 0 paid pilots
 ```
 
 Gmail inspection on 2026-07-20 independently confirmed the two sent end-user
-emails and the two automated acknowledgements. No matching reply from gVectors or NodeBB
-was found in the connected mailbox. A same-day self-test then confirmed from
+emails, the two automated acknowledgements, and one human platform-boundary
+reply found in Spam. The reply supports a distinct historical-analysis layer
+but clears none of the buyer qualification gates. No matching NodeBB reply was
+found. A same-day self-test then confirmed from
 the raw MIME header that the visible sender name still fails the identity gate
 in the response playbook. Pavilion's official `contact@pavilion.tech` route was
 verified and the single plain-text channel probe was sent from the authenticated
@@ -124,7 +126,7 @@ These are earliest permitted windows, not automatic sends:
 
 | Account | Current state | Earliest action |
 | --- | --- | --- |
-| gVectors / wpForo | First form submitted 2026-07-17; no matching reply in connected Gmail | One final form follow-up from 2026-07-24 through 2026-07-28, then close silent. |
+| gVectors / wpForo | Human platform-boundary reply received; no buyer gate cleared | No silence follow-up. Retain as substitute/channel evidence unless an opt-in end-user independently appears. |
 | NodeBB | First form submitted 2026-07-17; no matching reply in connected Gmail | One final form follow-up from 2026-07-24 through 2026-07-28, then close silent. |
 | MoneySavingExpert | Email sent; automated acknowledgement promises handling within two working days | Do not follow up before 2026-07-22; then one final reply in the existing thread if no human response. |
 | PistonHeads | Email sent; automated acknowledgement asks for up to ten working days | Do not follow up before 2026-08-03; then one final reply in the existing thread if no human response. |
