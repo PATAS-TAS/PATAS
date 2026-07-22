@@ -64,6 +64,12 @@ Do not treat the included thresholds or sample outputs as universal production p
 - [Scripts guide](scripts/README.md)
 - [Legacy notes](legacy/README.md)
 
+## Follow the work
+
+PATAS and maintainer updates: [Telegram](https://t.me/kiku_ai) ·
+[LinkedIn](https://www.linkedin.com/in/kiku-jw/) ·
+[KikuAI](https://kikuai.dev/)
+
 ## Legal notice
 
 Code is provided for evaluation and technical review. Any production use or long-term deployment may require a separate written agreement depending on your use case.
