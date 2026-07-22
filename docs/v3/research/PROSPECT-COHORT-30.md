@@ -22,8 +22,8 @@ Current funnel:
 
 ```text
 30 researched accounts
-12 activation targets
-5 first touches sent
+13 activation targets
+6 first touches sent
 2 automated acknowledgements
 1 human platform-boundary reply
 0 qualified prospects
@@ -41,7 +41,10 @@ in the response playbook. Pavilion's official `contact@pavilion.tech` route was
 verified and the single plain-text channel probe was sent from the authenticated
 Gmail account on 2026-07-20 with Nick's full PATAS signature and an explicit
 no-follow-up opt-out. Communiteq's official form still requires a controllable
-browser session.
+browser session. On 2026-07-22, Gmail's sender identity was corrected and
+verified by self-test. The official Mumsnet all-other-queries route was then
+re-verified and one bounded end-user currentness probe was accepted into Sent;
+this proves neither delivery nor interest.
 
 ## Scoring contract
 
@@ -75,6 +78,7 @@ and a budget owner.
 | 10 | BleepingComputer | End user boundary | 2/1/0/2/2/1 | 8 | An admin reported removing 30+ spammers and 40+ posts in one day amid a daily stream. | Official general/product-evaluation form | Ask only whether the workload remains material; disqualify if a non-PostgreSQL adapter would be required. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
 | 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Sent 2026-07-20 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-27, and do not commission a plugin before a buyer pays. |
+| 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Sent 2026-07-22 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-29. |
 
 ### Evidence for new activation targets
 
@@ -83,6 +87,7 @@ and a budget owner.
 - Home Assistant: [May 2025 attack and review load](https://community.home-assistant.io/t/spam-maybe-time-to-change-the-forum-rules/891040).
 - Arduino: [admin account of AI-assisted foothold spam](https://forum.arduino.cc/t/use-of-ai-generated-content-by-forum-helpers/1353366).
 - BleepingComputer: [operator account](https://www.bleepingcomputer.com/forums/t/801438/spambots-on-the-forum/) and [official contact form](https://www.bleepingcomputer.com/contact/).
+- Mumsnet: [official company contact](https://www.mumsnet.com/i/contact) and [company/controller identity](https://www.mumsnet.com/i/privacy-policy).
 
 ### Prepared copy for new activation targets
 

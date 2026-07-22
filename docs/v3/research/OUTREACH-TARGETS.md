@@ -1,7 +1,8 @@
 # PATAS first-customer outreach roster
 
-Status: activation in progress; 5 of 20 first touches sent — 2 on 2026-07-17,
-2 on 2026-07-18, and 1 on 2026-07-20. The three email entries are confirmed
+Status: activation in progress; 6 of 20 first touches sent — 2 on 2026-07-17,
+2 on 2026-07-18, 1 on 2026-07-20, and 1 on 2026-07-22. The four email
+entries are confirmed
 only as accepted into Gmail Sent; delivery, reading, and recipient interest
 remain unknown. One platform vendor has since returned a substantive boundary
 answer; it does not qualify an end-user buyer.
@@ -52,6 +53,7 @@ first message. Send no more than one follow-up after silence.
 | 11 | David, ControlBooth founder | [Official contact form](https://www.controlbooth.com/misc/contact) | Non-Discourse counterexample with a public whack-a-mole incident. | Interview only; no pilot offer |
 | 12 | Guido Leenders, Invantive | `sales@invantive.eu` | SQL-literate commercial operator and adjacent multilingual support-quality case. | Boundary interview only |
 | 13 | NodeBB team | [Official contact form](https://nodebb.org/contact) | A forum-platform and managed-hosting vendor can directly falsify whether the historical campaign-to-rule gap survives bundled controls or is cheaper to build in-house. | Platform boundary/channel probe; sent 2026-07-17 |
+| 14 | Mumsnet moderation team | `contactus@mumsnet.com` via the [official company contact page](https://www.mumsnet.com/i/contact) | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | B-tier currentness probe; sent 2026-07-22 |
 
 Rows 1-8 were the prepared first wave. NodeBB was added as a channel-safe
 platform-boundary substitute when Gmail required reauthentication and the n8n
@@ -285,6 +287,29 @@ Sources: [NodeBB product and hosting](https://nodebb.org/),
 [official contact form](https://nodebb.org/contact),
 [Spam-Be-Gone operator question](https://community.nodebb.org/topic/16163/best-practices-on-stopping-spam-need-advice-on-spam-be-gone-options).
 
+### 14. Mumsnet — moderation team
+
+**Sent to:** `contactus@mumsnet.com` on 2026-07-22
+
+**Subject:** Mumsnet moderation workload
+
+```text
+Hi Mumsnet moderation team — your July thread says reported AI-written posts are reviewed for genuine participation, while your current policy combines automated tools with trained human moderators. Is repeated deceptive or coordinated posting still taking 5+ staff-hours a week after those controls, or is it a minor workload? I’m validating PATAS, an offline review of past moderation decisions that finds recurring campaigns and possible rules. A one-line “material” or “minor” is enough.
+```
+
+**Why this recipient:** Mumsnet is a UK operating company with an official
+all-other-queries inbox and an active company moderation surface. The public
+evidence establishes current discussion and review of AI-assisted posts, but
+not recurring campaign volume, retained history, PostgreSQL fit, processing
+authority, or budget.
+
+**Advance only if:** the remaining deceptive or coordinated-posting job clears
+the staff-time threshold and repeats across messages or accounts after current
+controls. Qualify data, authority, deployment, and budget separately.
+
+Sources: [official company contact](https://www.mumsnet.com/i/contact),
+[company and controller identity](https://www.mumsnet.com/i/privacy-policy).
+
 ## Second-wave boundary interviews
 
 These contacts are useful to disprove assumptions. They are not substitutes
@@ -416,6 +441,7 @@ data shape, processing authority, budget owner, and next status. Do not collect
 spam text, usernames, IP addresses, or customer data during qualification.
 
 No external message was sent while preparing the initial roster. Nick
-authorized execution of the bounded plan on 2026-07-20; five first touches are
-now recorded, including the Pavilion channel probe. The channel, identity,
+authorized execution of the bounded plan on 2026-07-20; six first touches are
+now recorded, including the Pavilion channel probe and Mumsnet end-user probe.
+The sender identity gate was closed by a 2026-07-22 self-test. The channel,
 legal, rate, qualification, and one-follow-up gates still apply.
