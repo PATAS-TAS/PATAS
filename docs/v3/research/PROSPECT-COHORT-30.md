@@ -2,7 +2,7 @@
 
 Status: ranked research cohort; not a mailing list
 
-Research refresh: 2026-07-20
+Research refresh: 2026-07-28
 
 Owner issue: [#8](https://github.com/PATAS-TAS/PATAS/issues/8)
 
@@ -46,6 +46,12 @@ verified by self-test. The official Mumsnet all-other-queries route was then
 re-verified and one bounded end-user currentness probe was accepted into Sent;
 this proves neither delivery nor interest.
 
+On 2026-07-28, the Gmail connector exposed no mailbox tools, so no reply scan,
+follow-up, or first touch was attempted. Public-route research independently
+verified McNeel Europe's official sales inbox as the next appropriate B2B
+handoff route. BleepingComputer's only relevant public form requires
+reCAPTCHA, so it remains blocked rather than being worked around.
+
 ## Scoring contract
 
 Each factor is scored `0`, `1`, or `2` from public evidence:
@@ -67,7 +73,7 @@ and a budget owner.
 | Rank | Account | Role | P/T/D/B/R/U | Total | Public trigger | Contact state | Next action |
 | ---: | --- | --- | --- | ---: | --- | --- | --- |
 | 1 | Bambu Lab / MakerWorld | End user | 2/2/2/2/1/2 | 11 | A moderator reported a couple of hours of daily work, much of it spam bots and flags, in June 2026. | Channel not yet approved | Find a relevant company/community business route; do not use a forum DM or generic support ticket. |
-| 2 | McNeel / Rhino | End user | 2/1/2/2/2/2 | 11 | Staff manually removed an Italian-forum attack and separately described active removal of AI foothold accounts. | EMEA company directory verified | Address a currentness probe to the community operator through an appropriate McNeel business contact, not technical support. |
+| 2 | McNeel / Rhino | End user | 2/1/2/2/2/2 | 11 | Staff manually removed an Italian-forum attack and separately described active removal of AI foothold accounts. | Official McNeel Europe sales route verified | Send the currentness probe to `sales.eu@mcneel.com`, addressed to the Community team, after the mandatory Gmail reply-and-duplicate scan. |
 | 3 | Home Assistant / Nabu Casa | End user | 2/1/2/2/1/2 | 10 | More than 300 posts in one night caused registration/first-post restrictions and 20-30 reviews per hour. | Relevant business route not yet verified | Verify the community owner's business contact and whether the 2025 wave became recurring work. |
 | 4 | n8n | End user | 1/2/2/2/2/1 | 10 | A 2026 moderator announcement names spam and AI-answer policy as staffed work. | LinkedIn route blocked; not sent | Find an official non-forum route to the named community lead or close as unreachable. |
 | 5 | Arduino | End user | 1/1/2/2/1/2 | 9 | A named admin described AI-written foothold spam and an ongoing manual detection policy. | Relevant company route not yet verified | Ask whether the job is material after current Discourse controls; no forum solicitation. |
@@ -75,7 +81,7 @@ and a budget owner.
 | 7 | PistonHeads | End user | 1/2/1/2/2/1 | 9 | Current rules restrict overnight posting when moderation is unavailable. | Sent 2026-07-18; automated acknowledgement | Wait ten working days as requested; one follow-up only if appropriate. |
 | 8 | Best Practical | End user | 1/1/2/2/2/1 | 9 | Named admin reported plausible AI replies used to build reputation before spam. | US commercial-email legal gate | Do not send until a compliant postal-address and opt-out footer exist; first ask whether native Discourse AI solved it. |
 | 9 | Aseprite / Igara | End user | 1/1/2/1/2/2 | 9 | Founder reported posts edited after approval to bypass Watched Words. | Professional route identified; not sent | Verify country-specific outreach rules, then send the existing one-question currentness probe. |
-| 10 | BleepingComputer | End user boundary | 2/1/0/2/2/1 | 8 | An admin reported removing 30+ spammers and 40+ posts in one day amid a daily stream. | Official general/product-evaluation form | Ask only whether the workload remains material; disqualify if a non-PostgreSQL adapter would be required. |
+| 10 | BleepingComputer | End user boundary | 2/1/0/2/1/1 | 7 | An admin reported removing 30+ spammers and 40+ posts in one day amid a daily stream. | Official form requires reCAPTCHA | Do not attempt the CAPTCHA or substitute a scraped address; retain only as boundary evidence. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
 | 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Sent 2026-07-20 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-27, and do not commission a plugin before a buyer pays. |
 | 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Sent 2026-07-22 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-29. |
