@@ -55,6 +55,16 @@ subscribers provided identity and opt-out requirements are met. It replaces
 BleepingComputer in the activation queue. BleepingComputer's only relevant
 public form requires reCAPTCHA and remains boundary evidence.
 
+A second UK pass retained Digital Spy as a lower-priority currentness probe:
+its forum support inbox is still published and actively monitored, and the
+forum is operated by Hearst UK's registered company. Public evidence does not
+establish that spam is a material current workload, so the first question must
+falsify that assumption before any data or buyer qualification. Netmums was
+not activated: although it publishes a staffed moderation schedule, its current
+general form does not clearly route commercial moderation enquiries and its
+forum contains sensitive family and health discussions. That combination stays
+behind the legal/privacy gate rather than being treated as a convenient lead.
+
 ## Scoring contract
 
 Each factor is scored `0`, `1`, or `2` from public evidence:
@@ -88,6 +98,7 @@ and a budget owner.
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
 | 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Sent 2026-07-20 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-27, and do not commission a plugin before a buyer pays. |
 | 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Sent 2026-07-22 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-29. |
+| 14 | Digital Spy / Hearst UK | End user | 0/1/1/2/2/1 | 7 | A current company-operated forum support inbox is actively monitored, but no material current spam workload is public. | UK corporate route verified | After the mandatory Gmail scan, ask only whether recurring campaign cleanup is material; disqualify if minor or if no PostgreSQL replay path exists. |
 
 ### Evidence for new activation targets
 
@@ -96,6 +107,7 @@ and a budget owner.
 - Home Assistant: [May 2025 attack and review load](https://community.home-assistant.io/t/spam-maybe-time-to-change-the-forum-rules/891040).
 - Arduino: [admin account of AI-assisted foothold spam](https://forum.arduino.cc/t/use-of-ai-generated-content-by-forum-helpers/1353366).
 - The Student Room: [current moderation policy](https://www.thestudentroom.co.uk/faq.php?faq=rules), [current company contact](https://tsrmatters.com/where-to-find-us/), and [UK ICO corporate-subscriber guidance](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/).
+- Digital Spy: [current monitored forum-support route](https://forums.digitalspy.com/discussion/comment/106815373) and [Hearst UK company identity](https://www.hearst.co.uk/contact-us).
 - Mumsnet: [official company contact](https://www.mumsnet.com/i/contact) and [company/controller identity](https://www.mumsnet.com/i/privacy-policy).
 
 ### Prepared copy for new activation targets
@@ -134,6 +146,12 @@ Hi Arduino Community team — a forum admin described AI-written foothold posts 
 Hi The Student Room Community team — your current policy says staff review automated matches for spam and aim to handle inappropriate-content reports within 24 hours. Is recurring coordinated spam still taking 5+ staff-hours a week after those controls, or is it now a minor workload? I’m validating PATAS, an offline audit of past moderation decisions that finds recurring campaigns and reviewable rule candidates. A one-line “material” or “minor” is enough.
 ```
 
+**Digital Spy — subject: `Digital Spy recurring forum-spam workload`**
+
+```text
+Hi Digital Spy Forum Support — I found your current support route, but not a reliable public measure of the work behind it. Is recurring cross-account spam cleanup still taking 5+ staff-hours a week after your existing controls, or is it now a minor workload? I’m validating PATAS, an offline audit of past moderation decisions that finds recurring campaigns and reviewable rule candidates. A one-line “material” or “minor” is enough.
+```
+
 ## Follow-up calendar
 
 These are earliest permitted windows, not automatic sends:
@@ -170,6 +188,7 @@ or evidence that the original channel was inappropriate.
 | 28 | XenForo Ltd | Substitute/channel | 2/2/0/2/2/0 | 8 | Customers publicly report manual queues despite add-ons, but the platform is MySQL and sells native controls. |
 | 29 | Discourse Inc | Substitute/channel | 1/2/2/2/2/0 | 9 | Native AI spam detection is the central substitute; use it to falsify PATAS, not as a first customer. |
 | 30 | OzzModz / Xon add-ons | Substitute vendor | 1/2/0/1/2/0 | 6 | Existing paid XenForo add-ons may be the cheaper answer for that platform. |
+| 31 | Netmums | Privacy/channel boundary | 1/2/0/2/1/1 | 7 | A staffed moderation team and 12-hour report target are public, but the current form does not clearly permit product outreach and the forum mixes spam decisions with sensitive family and health content. |
 
 ### Boundary evidence
 
@@ -184,6 +203,7 @@ or evidence that the original channel was inappropriate.
 - Higher Logic: [pre-moderation guidance for large communities](https://success.vanillaforums.com/kb/articles/304-pre-moderate-content).
 - XenForo: [32 casino profiles per day despite multiple controls](https://xenforo.com/community/threads/spam-and-new-member-issues.232532/), [large approval queue](https://xenforo.com/community/threads/prevent-user-from-posting-after-x-post-sent-to-moderation-queue-for-approval.233364/), and [native spam tools](https://xenforo.com/features/spam/).
 - Discourse: [native AI spam detection replaces Akismet](https://meta.discourse.org/t/discourse-ai-spam-detection-replaces-akismet-plugin/354602) and [bulk deletion added after spam waves](https://meta.discourse.org/t/bulk-user-deletion-for-staff-now-available/345786).
+- Netmums: [staffed moderation schedule](https://www.netmums.com/info/meet-the-netmums-moderation-team) and [current contact/report policy](https://www.netmums.com/info/contact-us).
 
 ## Daily execution rules
 
