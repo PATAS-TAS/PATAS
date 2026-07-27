@@ -13,10 +13,9 @@ build. Several operated communities still spend real human time on recurring
 spam, but public posts do not establish export authority, a PostgreSQL rule
 path, or a budget owner. Those remain qualification gates.
 
-The activation queue is ten possible end-user buyers plus two channel probes.
-The other eighteen accounts are useful negative controls, deployment
-boundaries, or substitute vendors. They must not be rescued with custom
-adapters.
+The activation queue currently has thirteen end-user or channel targets.
+Remaining accounts are useful negative controls, deployment boundaries, or
+substitute vendors. They must not be rescued with custom adapters.
 
 Current funnel:
 
@@ -47,10 +46,14 @@ re-verified and one bounded end-user currentness probe was accepted into Sent;
 this proves neither delivery nor interest.
 
 On 2026-07-28, the Gmail connector exposed no mailbox tools, so no reply scan,
-follow-up, or first touch was attempted. Public-route research independently
-verified McNeel Europe's official sales inbox as the next appropriate B2B
-handoff route. BleepingComputer's only relevant public form requires
-reCAPTCHA, so it remains blocked rather than being worked around.
+follow-up, or first touch was attempted. A legal recheck overruled the earlier
+McNeel routing decision: Spain's LSSI prohibits unsolicited promotional email
+without prior request or authorization, so the public sales inbox alone does
+not clear the send gate. The Student Room Group is a UK limited company with a
+current generic business inbox; UK ICO guidance permits B2B email to corporate
+subscribers provided identity and opt-out requirements are met. It replaces
+BleepingComputer in the activation queue. BleepingComputer's only relevant
+public form requires reCAPTCHA and remains boundary evidence.
 
 ## Scoring contract
 
@@ -73,7 +76,7 @@ and a budget owner.
 | Rank | Account | Role | P/T/D/B/R/U | Total | Public trigger | Contact state | Next action |
 | ---: | --- | --- | --- | ---: | --- | --- | --- |
 | 1 | Bambu Lab / MakerWorld | End user | 2/2/2/2/1/2 | 11 | A moderator reported a couple of hours of daily work, much of it spam bots and flags, in June 2026. | Channel not yet approved | Find a relevant company/community business route; do not use a forum DM or generic support ticket. |
-| 2 | McNeel / Rhino | End user | 2/1/2/2/2/2 | 11 | Staff manually removed an Italian-forum attack and separately described active removal of AI foothold accounts. | Official McNeel Europe sales route verified | Send the currentness probe to `sales.eu@mcneel.com`, addressed to the Community team, after the mandatory Gmail reply-and-duplicate scan. |
+| 2 | McNeel / Rhino | End user | 2/1/2/2/0/2 | 9 | Staff manually removed an Italian-forum attack and separately described active removal of AI foothold accounts. | Spain cold-email legal gate | Do not send without recipient authorization or a non-promotional opt-in route; the public sales inbox does not clear LSSI Article 21. |
 | 3 | Home Assistant / Nabu Casa | End user | 2/1/2/2/1/2 | 10 | More than 300 posts in one night caused registration/first-post restrictions and 20-30 reviews per hour. | Relevant business route not yet verified | Verify the community owner's business contact and whether the 2025 wave became recurring work. |
 | 4 | n8n | End user | 1/2/2/2/2/1 | 10 | A 2026 moderator announcement names spam and AI-answer policy as staffed work. | LinkedIn route blocked; not sent | Find an official non-forum route to the named community lead or close as unreachable. |
 | 5 | Arduino | End user | 1/1/2/2/1/2 | 9 | A named admin described AI-written foothold spam and an ongoing manual detection policy. | Relevant company route not yet verified | Ask whether the job is material after current Discourse controls; no forum solicitation. |
@@ -81,7 +84,7 @@ and a budget owner.
 | 7 | PistonHeads | End user | 1/2/1/2/2/1 | 9 | Current rules restrict overnight posting when moderation is unavailable. | Sent 2026-07-18; automated acknowledgement | Wait ten working days as requested; one follow-up only if appropriate. |
 | 8 | Best Practical | End user | 1/1/2/2/2/1 | 9 | Named admin reported plausible AI replies used to build reputation before spam. | US commercial-email legal gate | Do not send until a compliant postal-address and opt-out footer exist; first ask whether native Discourse AI solved it. |
 | 9 | Aseprite / Igara | End user | 1/1/2/1/2/2 | 9 | Founder reported posts edited after approval to bypass Watched Words. | Professional route identified; not sent | Verify country-specific outreach rules, then send the existing one-question currentness probe. |
-| 10 | BleepingComputer | End user boundary | 2/1/0/2/1/1 | 7 | An admin reported removing 30+ spammers and 40+ posts in one day amid a daily stream. | Official form requires reCAPTCHA | Do not attempt the CAPTCHA or substitute a scraped address; retain only as boundary evidence. |
+| 10 | The Student Room Group | End user | 1/2/1/2/2/1 | 9 | Its current policy combines automated spam matching with human moderation and a 24-hour inappropriate-content response target. | UK corporate route verified | After the mandatory Gmail scan, send the one-question currentness probe to the current generic company inbox; disqualify if workload is minor or no PostgreSQL replay path exists. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
 | 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Sent 2026-07-20 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-27, and do not commission a plugin before a buyer pays. |
 | 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Sent 2026-07-22 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-29. |
@@ -89,10 +92,10 @@ and a budget owner.
 ### Evidence for new activation targets
 
 - Bambu Lab: [June 2026 moderation workload](https://forum.bambulab.com/t/does-this-forum-have-any-moderators/254608).
-- McNeel: [September 2025 spam attack](https://discourse.mcneel.com/t/italian-mcneel-discours-under-spam-attack/209689), [AI foothold removal](https://discourse.mcneel.com/t/i-would-rather-not-have-ai-on-rhinos-forum/206687), and [official EMEA company directory](https://www.rhino3d.com/en/mcneel/contact/emea/).
+- McNeel: [September 2025 spam attack](https://discourse.mcneel.com/t/italian-mcneel-discours-under-spam-attack/209689), [AI foothold removal](https://discourse.mcneel.com/t/i-would-rather-not-have-ai-on-rhinos-forum/206687), [official EMEA company directory](https://www.rhino3d.com/en/mcneel/contact/emea/), and [Spain LSSI Article 21](https://www.boe.es/eli/es/l/2002/07/11/34/con).
 - Home Assistant: [May 2025 attack and review load](https://community.home-assistant.io/t/spam-maybe-time-to-change-the-forum-rules/891040).
 - Arduino: [admin account of AI-assisted foothold spam](https://forum.arduino.cc/t/use-of-ai-generated-content-by-forum-helpers/1353366).
-- BleepingComputer: [operator account](https://www.bleepingcomputer.com/forums/t/801438/spambots-on-the-forum/) and [official contact form](https://www.bleepingcomputer.com/contact/).
+- The Student Room: [current moderation policy](https://www.thestudentroom.co.uk/faq.php?faq=rules), [current company contact](https://tsrmatters.com/where-to-find-us/), and [UK ICO corporate-subscriber guidance](https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/).
 - Mumsnet: [official company contact](https://www.mumsnet.com/i/contact) and [company/controller identity](https://www.mumsnet.com/i/privacy-policy).
 
 ### Prepared copy for new activation targets
@@ -125,10 +128,10 @@ Hi Nabu Casa Community team — during the May 2025 wave, more than 300 posts le
 Hi Arduino Community team — a forum admin described AI-written foothold posts used to hide later spam, while noting they had become easier to spot. Is this still a meaningful staff workload after current Discourse controls, or mostly handled? I’m validating PATAS, an offline audit of past moderation decisions that finds recurring campaigns and proposes rules for staff review. A one-line “material” or “handled” is enough.
 ```
 
-**BleepingComputer — subject: `BleepingComputer recurring forum spam`**
+**The Student Room — subject: `TSR recurring spam workload`**
 
 ```text
-Hi BleepingComputer team — an admin previously described removing more than 30 spammers and 40 posts in one day against a steady daily stream. Is recurring content spam still taking several staff-hours a week, or is it now handled by current controls? I’m validating PATAS, an offline historical pattern-audit idea, not proposing an integration. A one-line “still material” or “handled” is enough.
+Hi The Student Room Community team — your current policy says staff review automated matches for spam and aim to handle inappropriate-content reports within 24 hours. Is recurring coordinated spam still taking 5+ staff-hours a week after those controls, or is it now a minor workload? I’m validating PATAS, an offline audit of past moderation decisions that finds recurring campaigns and reviewable rule candidates. A one-line “material” or “minor” is enough.
 ```
 
 ## Follow-up calendar
@@ -147,13 +150,13 @@ or evidence that the original channel was inappropriate.
 
 ## Research and boundary queue
 
-| # | Account | Role | P/T/D/B/R/U | Total | Why it is not in the activation twelve |
+| # | Account | Role | P/T/D/B/R/U | Total | Why it is not in the activation queue |
 | ---: | --- | --- | --- | ---: | --- |
 | 13 | wpForo / gVectors | Platform/channel | 1/2/0/2/2/0 | 7 | Sent 2026-07-17. WordPress/MySQL and native AI make this a substitute test, not the frozen pilot. |
 | 14 | NodeBB | Platform/channel | 1/2/0/2/2/0 | 7 | Sent 2026-07-17. Native controls and a non-PostgreSQL product path; useful only if several hosted buyers share a gap. |
 | 15 | Masto.host | Channel | 0/1/2/1/2/2 | 8 | PostgreSQL-native, but no current customer pain or common enforcement contract is public. |
 | 16 | ControlBooth | End-user boundary | 1/1/0/1/2/0 | 5 | XenForo/MySQL incident may have been solved by configuration and phrase rules. |
-| 17 | Invantive | End-user boundary | 0/1/2/2/2/1 | 8 | Public volume was about one account per day, below the economic gate. |
+| 17 | BleepingComputer | End-user boundary | 2/1/0/2/1/1 | 7 | Material historical workload, but the likely non-PostgreSQL path fails the frozen pilot and the only relevant official form requires reCAPTCHA. |
 | 18 | IDM Forums | Research only | 1/2/2/0/0/2 | 7 | Forum solicitation is prohibited and no separate payer/business route is verified. |
 | 19 | Epic Developer Community | Enterprise boundary | 2/1/2/2/1/1 | 9 | Strong delayed-edit/LLM pattern, but procurement and internal-build risk are too high for the first pilot. |
 | 20 | MacRumors | End-user boundary | 2/1/0/2/1/1 | 7 | Hundreds of removals and reports, but likely XenForo/MySQL and no relevant business route verified. |
@@ -170,6 +173,7 @@ or evidence that the original channel was inappropriate.
 
 ### Boundary evidence
 
+- BleepingComputer: [operator account](https://www.bleepingcomputer.com/forums/t/801438/spambots-on-the-forum/) and [official CAPTCHA-gated contact form](https://www.bleepingcomputer.com/contact/).
 - Epic: [LLM-written posts later edited to malware links](https://forums.unrealengine.com/t/something-really-strange-is-happening-to-this-forum/2656570).
 - MacRumors: [hundreds of spam removals and more than 100 reports](https://forums.macrumors.com/threads/why-do-we-need-to-wait-5-minutes-between-two-reports.2450513/).
 - Shopify: [repeated app promotion across old threads](https://community.shopify.com/t/ongoing-issue-with-app-promotion-on-old-threads/408136).
