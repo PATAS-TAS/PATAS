@@ -13,7 +13,7 @@ build. Several operated communities still spend real human time on recurring
 spam, but public posts do not establish export authority, a PostgreSQL rule
 path, or a budget owner. Those remain qualification gates.
 
-The activation queue currently has thirteen end-user or channel targets.
+The activation queue currently has fourteen end-user or channel targets.
 Remaining accounts are useful negative controls, deployment boundaries, or
 substitute vendors. They must not be rescued with custom adapters.
 
@@ -21,8 +21,8 @@ Current funnel:
 
 ```text
 30 researched accounts
-13 activation targets
-6 first touches sent
+14 activation targets
+8 first touches sent
 2 automated acknowledgements
 1 human platform-boundary reply
 0 qualified prospects
@@ -45,15 +45,23 @@ verified by self-test. The official Mumsnet all-other-queries route was then
 re-verified and one bounded end-user currentness probe was accepted into Sent;
 this proves neither delivery nor interest.
 
-On 2026-07-28, the Gmail connector exposed no mailbox tools, so no reply scan,
-follow-up, or first touch was attempted. A legal recheck overruled the earlier
-McNeel routing decision: Spain's LSSI prohibits unsolicited promotional email
-without prior request or authorization, so the public sales inbox alone does
-not clear the send gate. The Student Room Group is a UK limited company with a
-current generic business inbox; UK ICO guidance permits B2B email to corporate
-subscribers provided identity and opt-out requirements are met. It replaces
-BleepingComputer in the activation queue. BleepingComputer's only relevant
-public form requires reCAPTCHA and remains boundary evidence.
+On 2026-07-28, the Gmail connector was initially unavailable, then returned.
+A fresh All Mail, Spam, Sent, bounce, and duplicate scan across every contacted
+recipient found no new substantive reply or verified bounce. The single final
+follow-ups were then sent to MoneySavingExpert and Pavilion in their existing
+threads, and NodeBB's official form displayed `Message sent` for its single
+final follow-up. The Student Room and Digital Spy each received one bounded
+UK-corporate currentness probe, exhausting the day's two-first-touch limit.
+Sent mail and form acceptance prove neither delivery, reading, nor interest.
+
+A legal recheck overruled the earlier McNeel routing decision: Spain's LSSI
+prohibits unsolicited promotional email without prior request or
+authorization, so the public sales inbox alone does not clear the send gate.
+The Student Room Group is a UK limited company with a current generic business
+inbox; UK ICO guidance permits B2B email to corporate subscribers provided
+identity and opt-out requirements are met. It replaces BleepingComputer in the
+activation queue. BleepingComputer's only relevant public form requires
+reCAPTCHA and remains boundary evidence.
 
 A second UK pass retained Digital Spy as a lower-priority currentness probe:
 its forum support inbox is still published and actively monitored, and the
@@ -90,15 +98,15 @@ and a budget owner.
 | 3 | Home Assistant / Nabu Casa | End user | 2/1/2/2/1/2 | 10 | More than 300 posts in one night caused registration/first-post restrictions and 20-30 reviews per hour. | Relevant business route not yet verified | Verify the community owner's business contact and whether the 2025 wave became recurring work. |
 | 4 | n8n | End user | 1/2/2/2/2/1 | 10 | A 2026 moderator announcement names spam and AI-answer policy as staffed work. | LinkedIn route blocked; not sent | Find an official non-forum route to the named community lead or close as unreachable. |
 | 5 | Arduino | End user | 1/1/2/2/1/2 | 9 | A named admin described AI-written foothold spam and an ongoing manual detection policy. | Relevant company route not yet verified | Ask whether the job is material after current Discourse controls; no forum solicitation. |
-| 6 | MoneySavingExpert | End user | 1/2/1/2/2/1 | 9 | A large commercial forum maintains a staff/member spam-busting workflow. | Sent 2026-07-18; automated acknowledgement | Wait for the stated two-working-day handling window, then at most one follow-up. |
+| 6 | MoneySavingExpert | End user | 1/2/1/2/2/1 | 9 | A large commercial forum maintains a staff/member spam-busting workflow. | Final follow-up sent 2026-07-28 after automated acknowledgement; no human reply | Close after a reply or silence; do not contact again. |
 | 7 | PistonHeads | End user | 1/2/1/2/2/1 | 9 | Current rules restrict overnight posting when moderation is unavailable. | Sent 2026-07-18; automated acknowledgement | Wait ten working days as requested; one follow-up only if appropriate. |
 | 8 | Best Practical | End user | 1/1/2/2/2/1 | 9 | Named admin reported plausible AI replies used to build reputation before spam. | US commercial-email legal gate | Do not send until a compliant postal-address and opt-out footer exist; first ask whether native Discourse AI solved it. |
 | 9 | Aseprite / Igara | End user | 1/1/2/1/2/2 | 9 | Founder reported posts edited after approval to bypass Watched Words. | Professional route identified; not sent | Verify country-specific outreach rules, then send the existing one-question currentness probe. |
-| 10 | The Student Room Group | End user | 1/2/1/2/2/1 | 9 | Its current policy combines automated spam matching with human moderation and a 24-hour inappropriate-content response target. | UK corporate route verified | After the mandatory Gmail scan, send the one-question currentness probe to the current generic company inbox; disqualify if workload is minor or no PostgreSQL replay path exists. |
+| 10 | The Student Room Group | End user | 1/2/1/2/2/1 | 9 | Its current policy combines automated spam matching with human moderation and a 24-hour inappropriate-content response target. | Sent 2026-07-28; delivery, reading, and interest unknown | Wait until 2026-08-04 through 2026-08-06; send at most one final follow-up if no reply or bounce exists. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
-| 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Sent 2026-07-20 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-27, and do not commission a plugin before a buyer pays. |
+| 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Final follow-up sent 2026-07-28; delivery, reading, and interest unknown | Close after a reply or silence; do not contact again or commission a plugin before a buyer pays. |
 | 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Sent 2026-07-22 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-29. |
-| 14 | Digital Spy / Hearst UK | End user | 0/1/1/2/2/1 | 7 | A current company-operated forum support inbox is actively monitored, but no material current spam workload is public. | UK corporate route verified | After the mandatory Gmail scan, ask only whether recurring campaign cleanup is material; disqualify if minor or if no PostgreSQL replay path exists. |
+| 14 | Digital Spy / Hearst UK | End user | 0/1/1/2/2/1 | 7 | A current company-operated forum support inbox is actively monitored, but no material current spam workload is public. | Sent 2026-07-28; delivery, reading, and interest unknown | Wait until 2026-08-04 through 2026-08-06; send at most one final follow-up if no reply or bounce exists. |
 
 ### Evidence for new activation targets
 
@@ -159,9 +167,13 @@ These are earliest permitted windows, not automatic sends:
 | Account | Current state | Earliest action |
 | --- | --- | --- |
 | gVectors / wpForo | Human platform-boundary reply received; no buyer gate cleared | No silence follow-up. Retain as substitute/channel evidence unless an opt-in end-user independently appears. |
-| NodeBB | First form submitted 2026-07-17; no matching reply in connected Gmail | One final form follow-up from 2026-07-24 through 2026-07-28, then close silent. |
-| MoneySavingExpert | Email sent; automated acknowledgement promises handling within two working days | Do not follow up before 2026-07-22; then one final reply in the existing thread if no human response. |
+| NodeBB | Final form follow-up accepted 2026-07-28; no matching reply in connected Gmail | Close after a reply or silence; do not contact again. |
+| MoneySavingExpert | Final in-thread follow-up sent 2026-07-28 after automated acknowledgement | Close after a reply or silence; do not contact again. |
 | PistonHeads | Email sent; automated acknowledgement asks for up to ten working days | Do not follow up before 2026-08-03; then one final reply in the existing thread if no human response. |
+| Pavilion | Final in-thread follow-up sent 2026-07-28; no matching reply in connected Gmail | Close after a reply or silence; do not contact again. |
+| Mumsnet | First email sent 2026-07-22; no matching reply or bounce | One final follow-up from 2026-07-29 through 2026-07-31, then close silent. |
+| The Student Room | First email sent 2026-07-28; no matching reply or bounce at send time | One final follow-up from 2026-08-04 through 2026-08-06, then close silent. |
+| Digital Spy | First email sent 2026-07-28; no matching reply or bounce at send time | One final follow-up from 2026-08-04 through 2026-08-06, then close silent. |
 
 Every follow-up is cancelled by a human response, an opt-out, a solved answer,
 or evidence that the original channel was inappropriate.
