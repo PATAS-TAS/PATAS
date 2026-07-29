@@ -53,7 +53,7 @@ first message. Send no more than one follow-up after silence.
 | 11 | David, ControlBooth founder | [Official contact form](https://www.controlbooth.com/misc/contact) | Non-Discourse counterexample with a public whack-a-mole incident. | Interview only; no pilot offer |
 | 12 | Guido Leenders, Invantive | `sales@invantive.eu` | SQL-literate commercial operator and adjacent multilingual support-quality case. | Boundary interview only |
 | 13 | NodeBB team | [Official contact form](https://nodebb.org/contact) | A forum-platform and managed-hosting vendor can directly falsify whether the historical campaign-to-rule gap survives bundled controls or is cheaper to build in-house. | Platform boundary/channel probe; sent 2026-07-17 |
-| 14 | Mumsnet moderation team | `contactus@mumsnet.com` via the [official company contact page](https://www.mumsnet.com/i/contact) | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | B-tier currentness probe; sent 2026-07-22 |
+| 14 | Mumsnet moderation team | `contactus@mumsnet.com` via the [official company contact page](https://www.mumsnet.com/i/contact) | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | B-tier currentness probe; first touch sent 2026-07-22, final follow-up sent 2026-07-29, then closed to further outreach |
 
 Rows 1-8 were the prepared first wave. NodeBB was added as a channel-safe
 platform-boundary substitute when Gmail required reauthentication and the n8n

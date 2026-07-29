@@ -2,7 +2,7 @@
 
 Status: ranked research cohort; not a mailing list
 
-Research refresh: 2026-07-28
+Research refresh: 2026-07-29
 
 Owner issue: [#8](https://github.com/PATAS-TAS/PATAS/issues/8)
 
@@ -23,6 +23,7 @@ Current funnel:
 30 researched accounts
 14 activation targets
 8 first touches sent
+4 final follow-ups sent or accepted
 2 automated acknowledgements
 1 human platform-boundary reply
 0 qualified prospects
@@ -53,6 +54,13 @@ threads, and NodeBB's official form displayed `Message sent` for its single
 final follow-up. The Student Room and Digital Spy each received one bounded
 UK-corporate currentness probe, exhausting the day's two-first-touch limit.
 Sent mail and form acceptance prove neither delivery, reading, nor interest.
+
+On 2026-07-29, a fresh Gmail readback found that the single final Mumsnet
+follow-up had already been sent in the original thread at
+2026-07-29T21:59:01Z. The thread contains only the first touch and that final
+follow-up: no human reply or verified bounce was present. Mumsnet is therefore
+closed to further outreach unless it replies; the message is channel
+acceptance only, not delivery, reading, interest, or buyer qualification.
 
 A legal recheck overruled the earlier McNeel routing decision: Spain's LSSI
 prohibits unsolicited promotional email without prior request or
@@ -105,7 +113,7 @@ and a budget owner.
 | 10 | The Student Room Group | End user | 1/2/1/2/2/1 | 9 | Its current policy combines automated spam matching with human moderation and a 24-hour inappropriate-content response target. | Sent 2026-07-28; delivery, reading, and interest unknown | Wait until 2026-08-04 through 2026-08-06; send at most one final follow-up if no reply or bounce exists. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
 | 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Final follow-up sent 2026-07-28; delivery, reading, and interest unknown | Close after a reply or silence; do not contact again or commission a plugin before a buyer pays. |
-| 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Sent 2026-07-22 from authenticated Gmail; delivery, reading, and interest unknown | Wait for a human reply. Do not follow up before 2026-07-29. |
+| 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Final in-thread follow-up sent 2026-07-29; no human reply or verified bounce in the 2026-07-29 readback | Close after a reply or silence; do not contact again. |
 | 14 | Digital Spy / Hearst UK | End user | 0/1/1/2/2/1 | 7 | A current company-operated forum support inbox is actively monitored, but no material current spam workload is public. | Sent 2026-07-28; delivery, reading, and interest unknown | Wait until 2026-08-04 through 2026-08-06; send at most one final follow-up if no reply or bounce exists. |
 
 ### Evidence for new activation targets
@@ -171,7 +179,7 @@ These are earliest permitted windows, not automatic sends:
 | MoneySavingExpert | Final in-thread follow-up sent 2026-07-28 after automated acknowledgement | Close after a reply or silence; do not contact again. |
 | PistonHeads | Email sent; automated acknowledgement asks for up to ten working days | Do not follow up before 2026-08-03; then one final reply in the existing thread if no human response. |
 | Pavilion | Final in-thread follow-up sent 2026-07-28; no matching reply in connected Gmail | Close after a reply or silence; do not contact again. |
-| Mumsnet | First email sent 2026-07-22; no matching reply or bounce | One final follow-up from 2026-07-29 through 2026-07-31, then close silent. |
+| Mumsnet | Final in-thread follow-up sent 2026-07-29; no human reply or verified bounce in the 2026-07-29 readback | Close after a reply or silence; do not contact again. |
 | The Student Room | First email sent 2026-07-28; no matching reply or bounce at send time | One final follow-up from 2026-08-04 through 2026-08-06, then close silent. |
 | Digital Spy | First email sent 2026-07-28; no matching reply or bounce at send time | One final follow-up from 2026-08-04 through 2026-08-06, then close silent. |
 
