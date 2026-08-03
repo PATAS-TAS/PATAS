@@ -4,7 +4,7 @@
 # =============================================================================
 # Stage 1: Build stage
 # =============================================================================
-FROM python:3.10-slim as builder
+FROM python:3.14-slim as builder
 
 WORKDIR /app
 
@@ -40,7 +40,7 @@ RUN pip install --no-cache-dir -e .
 # =============================================================================
 # Stage 2: Production runtime
 # =============================================================================
-FROM python:3.10-slim as production
+FROM python:3.14-slim as production
 
 # Security: Run as non-root user
 RUN groupadd --gid 1000 patas && \
