@@ -28,7 +28,7 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 protobuf = "^6.33.0"
 sentencepiece = "^0.2.1"
-httpx = "^0.25.0"
+httpx = ">=0.25,<0.29"
 cachetools = "^6.2.1"
 redis = {version = "^5.0.0", optional = true}
 opentelemetry-api = "^1.21.0"
