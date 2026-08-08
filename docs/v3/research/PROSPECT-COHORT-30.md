@@ -62,6 +62,13 @@ follow-up: no human reply or verified bounce was present. Mumsnet is therefore
 closed to further outreach unless it replies; the message is channel
 acceptance only, not delivery, reading, interest, or buyer qualification.
 
+On 2026-08-08, a fresh authenticated Gmail All Mail, Spam, and delivery-failure
+scan found no new human reply or verified bounce from any contacted recipient.
+The permitted PistonHeads, The Student Room, and Digital Spy follow-up windows
+have all expired silently. The eight-touch cohort therefore has no remaining
+silence follow-up; the next action is to verify a new productizable end-user
+route, not to revive closed lanes.
+
 A legal recheck overruled the earlier McNeel routing decision: Spain's LSSI
 prohibits unsolicited promotional email without prior request or
 authorization, so the public sales inbox alone does not clear the send gate.
@@ -107,14 +114,14 @@ and a budget owner.
 | 4 | n8n | End user | 1/2/2/2/2/1 | 10 | A 2026 moderator announcement names spam and AI-answer policy as staffed work. | LinkedIn route blocked; not sent | Find an official non-forum route to the named community lead or close as unreachable. |
 | 5 | Arduino | End user | 1/1/2/2/1/2 | 9 | A named admin described AI-written foothold spam and an ongoing manual detection policy. | Relevant company route not yet verified | Ask whether the job is material after current Discourse controls; no forum solicitation. |
 | 6 | MoneySavingExpert | End user | 1/2/1/2/2/1 | 9 | A large commercial forum maintains a staff/member spam-busting workflow. | Final follow-up sent 2026-07-28 after automated acknowledgement; no human reply | Close after a reply or silence; do not contact again. |
-| 7 | PistonHeads | End user | 1/2/1/2/2/1 | 9 | Current rules restrict overnight posting when moderation is unavailable. | Sent 2026-07-18; automated acknowledgement | Wait ten working days as requested; one follow-up only if appropriate. |
+| 7 | PistonHeads | End user | 1/2/1/2/2/1 | 9 | Current rules restrict overnight posting when moderation is unavailable. | Follow-up window expired 2026-08-05; no human reply or verified bounce | Close silent; do not contact again. |
 | 8 | Best Practical | End user | 1/1/2/2/2/1 | 9 | Named admin reported plausible AI replies used to build reputation before spam. | US commercial-email legal gate | Do not send until a compliant postal-address and opt-out footer exist; first ask whether native Discourse AI solved it. |
 | 9 | Aseprite / Igara | End user | 1/1/2/1/2/2 | 9 | Founder reported posts edited after approval to bypass Watched Words. | Professional route identified; not sent | Verify country-specific outreach rules, then send the existing one-question currentness probe. |
-| 10 | The Student Room Group | End user | 1/2/1/2/2/1 | 9 | Its current policy combines automated spam matching with human moderation and a 24-hour inappropriate-content response target. | Sent 2026-07-28; delivery, reading, and interest unknown | Wait until 2026-08-04 through 2026-08-06; send at most one final follow-up if no reply or bounce exists. |
+| 10 | The Student Room Group | End user | 1/2/1/2/2/1 | 9 | Its current policy combines automated spam matching with human moderation and a 24-hour inappropriate-content response target. | Follow-up window expired 2026-08-06; no human reply or verified bounce | Close silent; do not contact again. |
 | 11 | Communiteq | Channel | 0/2/2/2/2/2 | 10 | Managed Discourse host can identify a permissioned customer and test one reusable deployment contract. | Prepared; not confirmed sent | Send the existing channel question through the official form. No processor-held customer data. |
 | 12 | Pavilion | Channel | 0/2/2/2/2/2 | 10 | Discourse consultancy can test whether the gap repeats across paying communities. | Final follow-up sent 2026-07-28; delivery, reading, and interest unknown | Close after a reply or silence; do not contact again or commission a plugin before a buyer pays. |
 | 13 | Mumsnet | End user | 1/2/1/2/2/1 | 9 | A commercial forum has an active company moderation surface and current public discussion of deceptive AI-assisted participation. | Final in-thread follow-up sent 2026-07-29; no human reply or verified bounce in the 2026-07-29 readback | Close after a reply or silence; do not contact again. |
-| 14 | Digital Spy / Hearst UK | End user | 0/1/1/2/2/1 | 7 | A current company-operated forum support inbox is actively monitored, but no material current spam workload is public. | Sent 2026-07-28; delivery, reading, and interest unknown | Wait until 2026-08-04 through 2026-08-06; send at most one final follow-up if no reply or bounce exists. |
+| 14 | Digital Spy / Hearst UK | End user | 0/1/1/2/2/1 | 7 | A current company-operated forum support inbox is actively monitored, but no material current spam workload is public. | Follow-up window expired 2026-08-06; no human reply or verified bounce | Close silent; do not contact again. |
 
 ### Evidence for new activation targets
 
@@ -177,11 +184,11 @@ These are earliest permitted windows, not automatic sends:
 | gVectors / wpForo | Human platform-boundary reply received; no buyer gate cleared | No silence follow-up. Retain as substitute/channel evidence unless an opt-in end-user independently appears. |
 | NodeBB | Final form follow-up accepted 2026-07-28; no matching reply in connected Gmail | Close after a reply or silence; do not contact again. |
 | MoneySavingExpert | Final in-thread follow-up sent 2026-07-28 after automated acknowledgement | Close after a reply or silence; do not contact again. |
-| PistonHeads | Email sent; automated acknowledgement asks for up to ten working days | Do not follow up before 2026-08-03; then one final reply in the existing thread if no human response. |
+| PistonHeads | Follow-up window expired 2026-08-05 with no human reply or verified bounce | Close silent; do not contact again. |
 | Pavilion | Final in-thread follow-up sent 2026-07-28; no matching reply in connected Gmail | Close after a reply or silence; do not contact again. |
 | Mumsnet | Final in-thread follow-up sent 2026-07-29; no human reply or verified bounce in the 2026-07-29 readback | Close after a reply or silence; do not contact again. |
-| The Student Room | First email sent 2026-07-28; no matching reply or bounce at send time | One final follow-up from 2026-08-04 through 2026-08-06, then close silent. |
-| Digital Spy | First email sent 2026-07-28; no matching reply or bounce at send time | One final follow-up from 2026-08-04 through 2026-08-06, then close silent. |
+| The Student Room | Follow-up window expired 2026-08-06 with no human reply or verified bounce | Close silent; do not contact again. |
+| Digital Spy | Follow-up window expired 2026-08-06 with no human reply or verified bounce | Close silent; do not contact again. |
 
 Every follow-up is cancelled by a human response, an opt-out, a solved answer,
 or evidence that the original channel was inappropriate.
