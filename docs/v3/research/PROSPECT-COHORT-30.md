@@ -1,8 +1,8 @@
 # PATAS trigger-based prospect cohort
 
-Status: ranked research cohort; not a mailing list
+Status: cold cohort parked; warm/permissioned design-partner lane required
 
-Research refresh: 2026-07-29
+Research refresh: 2026-08-08
 
 Owner issue: [#8](https://github.com/PATAS-TAS/PATAS/issues/8)
 
@@ -12,6 +12,14 @@ The public evidence supports a narrow first-customer search, not a product
 build. Several operated communities still spend real human time on recurring
 spam, but public posts do not establish export authority, a PostgreSQL rule
 path, or a budget owner. Those remain qualification gates.
+
+The first cold-email cohort is now parked as an experiment result: eight
+individually verified first touches, four permitted follow-ups, one human
+platform-boundary reply, and zero qualified buyers. The next experiment is
+materially different: up to ten permissioned conversations with named
+moderation or managed-community operators reached through a real introduction
+or explicit opt-in. The unused cold-touch allowance is reserved, not a reason
+to revive silent lanes.
 
 The activation queue currently has fourteen end-user or channel targets.
 Remaining accounts are useful negative controls, deployment boundaries, or
@@ -67,7 +75,10 @@ scan found no new human reply or verified bounce from any contacted recipient.
 The permitted PistonHeads, The Student Room, and Digital Spy follow-up windows
 have all expired silently. The eight-touch cohort therefore has no remaining
 silence follow-up; the next action is to verify a new productizable end-user
-route, not to revive closed lanes.
+route, not to revive closed lanes. A mailbox review for warm/permissioned
+signals found no substantive existing relationship that authorizes a PATAS
+business approach. The unrelated inbound community invitation and a one-line
+test message are not treated as buyer permission.
 
 A legal recheck overruled the earlier McNeel routing decision: Spain's LSSI
 prohibits unsolicited promotional email without prior request or
@@ -234,16 +245,22 @@ or evidence that the original channel was inappropriate.
 
 ## Daily execution rules
 
-1. Work only down the activation queue, at no more than two first touches per
-   weekday and one follow-up after the recipient's stated response window.
-2. Use an official business channel or a named professional route. Do not use
+1. The cold activation queue is parked. Do not spend the remaining first-touch
+   allowance until a real introduction or explicit opt-in creates a
+   permissioned operator conversation.
+2. The warm lane is capped at ten conversations. Qualify one recent recurring
+   moderation job, staff-hours per week or month after native controls, the
+   retained abuse-plus-legitimate history, export/process authority, and the
+   budget owner before discussing the fixed offer.
+3. Use an official business channel or a named professional route. Do not use
    forum posts, forum private messages, scraped personal addresses, enrichment,
    mail merge, or multiple mailboxes.
-3. First touch is a currentness probe with one question. Do not attach the
-   sample card, ask for data, request a call, or mention a bespoke feature.
-4. After a positive reply, use the metadata-only qualification in
+4. First contact in the warm lane is a permission check and one real question.
+   Do not attach the sample card, ask for data, request a call, or mention a
+   bespoke feature before qualification.
+5. After a positive reply, use the metadata-only qualification in
    [OUTREACH-RESPONSE-PLAYBOOK.md](OUTREACH-RESPONSE-PLAYBOOK.md).
-5. Send the identical [$500 pilot](../sales/FOUNDING-PILOT.md) only after every
+6. Send the identical [$500 pilot](../sales/FOUNDING-PILOT.md) only after every
    buyer gate is answered. No adapter, dashboard, connector, or free audit.
 
 ## Cohort kill and continuation rules
@@ -251,6 +268,9 @@ or evidence that the original channel was inappropriate.
 - After 20 compliant first touches: if fewer than three human conversations or
   no prospect reaches qualification, stop this cohort and change the segment or
   channel. Do not build from silence.
+- For the warm lane: continue only if at least two operators quantify the same
+  recurring job and at least one has budget authority. Otherwise park PATAS and
+  change the problem or segment rather than adding features.
 - After five identical paid offers to qualified buyers: if none pays, stop the
   offer and revisit the job, price, or buyer. Do not discount or add custom work
   to force a conversion.
