@@ -2,7 +2,7 @@
 
 PATAS Core is a pattern-discovery and rule-management system for anti-spam teams reviewing historical message logs.
 
-**[Open the live demo](https://patas.app/demo)**
+**[Open the live demo](https://kikuai.dev/patas/demo)**
 
 [Docs](#documentation) · [Examples](examples/) · [Architecture map](app/README.md)
 

@@ -196,12 +196,11 @@ name did not match the required founder identity. On 2026-07-22, Gmail's
 `Nick Dudnichenko — PATAS` `From` identity. The identity gate is closed; do not
 rotate mailboxes or weaken the remaining channel and legal gates.
 
-This is a first-wave decision, not the desired permanent brand mailbox. The
-long-term address should be a real human mailbox such as `nick@patas.app` on a
-provider that signs outgoing mail for `patas.app`. Before it is used, the
-domain must have aligned SPF, 2048-bit DKIM, and DMARC starting at `p=none`, and
-a test message's original headers must show `SPF=PASS`, `DKIM=PASS`, and
-`DMARC=PASS`. `support@patas.app` remains for support, not founder outreach.
+As of 2026-09-30, the standalone domain is retiring. Product links use
+https://kikuai.dev/patas/ and support uses support@kikuai.dev. Do not create a
+new mailbox on the retired domain. This migration does not approve outreach
+or establish a new authenticated outbound sender. The dated DNS evidence
+above is historical.
 
 ### First-wave sending rules
 

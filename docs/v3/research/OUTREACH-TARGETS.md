@@ -269,7 +269,7 @@ Sources: [December 2025 attack](https://wpforo.com/community/general-discussions
 Hi NodeBB team — I saw Spam-Be-Gone is bundled, while operators still ask how to combine its controls. I’m validating PATAS: an offline audit that groups recurring campaigns in historical abuse reports and tests candidate rules against legitimate history. Is historical campaign-to-rule discovery still a gap for hosted NodeBB operators, or already covered well enough? A one-line answer is enough; no integration pitch.
 
 Nick Dudnichenko — PATAS
-https://patas.app
+https://kikuai.dev/patas
 If irrelevant, I won’t follow up.
 ```
 

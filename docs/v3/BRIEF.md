@@ -158,8 +158,8 @@ Owning repository: `KikuAI-Lab/kikuai.dev`, local checkout
 - Email one-time-code sign-in, API-key creation, usage limits, audit credits,
   Paddle checkout, webhook provisioning, and PATAS-branded account work were
   implemented.
-- `patas.app` owns the focused product, demo, and documentation.
-- `account.patas.app` owns the PATAS account experience while reusing the
+- `kikuai.dev/patas/` owns the focused product, demo, and documentation.
+- `kikuai.dev/account/patas/` owns the PATAS account experience while reusing the
   KikuAI backend.
 - `kikuai.dev` remains the broader product hub and hosted runtime.
 
@@ -551,9 +551,9 @@ be a web service.
 - [PATAS landing](https://github.com/PATAS-TAS/patas-landing)
 - [PATAS product context](https://github.com/PATAS-TAS/patas-landing/blob/main/PRODUCT.md)
 - [First testers launch packet](https://github.com/PATAS-TAS/patas-landing/blob/main/docs/first-testers-launch-packet.md)
-- [PATAS demo](https://patas.app/demo/)
-- [Hosted API guide](https://patas.app/docs/api/)
-- [Account](https://account.patas.app/)
+- [PATAS demo](https://kikuai.dev/patas/demo/)
+- [Hosted API guide](https://kikuai.dev/patas/docs/api/)
+- [Account](https://kikuai.dev/account/patas/)
 - [Sentence Transformers clustering examples](https://www.sbert.net/examples/applications/clustering/README.html)
 - [scikit-learn HDBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html)
 - [BERTopic algorithm](https://maartengr.github.io/BERTopic/algorithm/algorithm.html)
